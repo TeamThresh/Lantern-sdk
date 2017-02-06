@@ -3,6 +3,7 @@ package com.lantern.lantern;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Debug;
 import android.util.Log;
@@ -19,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
+import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.WINDOW_SERVICE;
 import static com.lantern.lantern.RYLA.isAppForeground;
 
@@ -35,6 +37,13 @@ public class RylaInstrumentation extends Instrumentation {
     private LinearLayout touchLayout;
 
     static List<Long> usages1 = new ArrayList<>();
+
+    private static int dumpTerm;
+
+    public RylaInstrumentation() {
+        SharedPreferences pref = RYLA.getInstance().getContext().getSharedPreferences("pref", MODE_PRIVATE);
+        dumpTerm = pref.getInt("dump_term", 60000);
+    }
 
     // Instrumentation 초기화 실행
     private static RylaInstrumentation rylaInstrumentation = new RylaInstrumentation();
@@ -120,7 +129,7 @@ public class RylaInstrumentation extends Instrumentation {
                 Log.d("CPU INFO", readUsage2());
             }
             try {
-                Thread.sleep(3000);
+                Thread.sleep(dumpTerm);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -180,7 +189,7 @@ public class RylaInstrumentation extends Instrumentation {
                 return "init";
             }
 
-//            user nice system idle iowait  irq  softirq steal guest guest_nice
+            // user nice system idle iowait  irq  softirq steal guest guest_nice
             String rtn = "\nuser\tnice\tsystem\tidle\tiowait\tirq\tsoftirq\tsteal\tguest\tguest_nice\n";
             for (int i = 0; i < usages1.size(); i++) {
                 rtn += (usages2.get(i) - usages1.get(i)) + "\t\t";
