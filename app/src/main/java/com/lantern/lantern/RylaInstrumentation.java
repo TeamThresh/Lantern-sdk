@@ -113,6 +113,9 @@ public class RylaInstrumentation extends Instrumentation {
                     Log.d("ACTIVITIES", activity.getClass().getSimpleName());
                 }
 
+                // NETWORK USAGE INFO
+                getNetworkRxTxTracing();
+
                 // MEMORY INFO
                 Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
                 Debug.getMemoryInfo(memoryInfo);
@@ -205,6 +208,23 @@ public class RylaInstrumentation extends Instrumentation {
         return "none";
     }
 
+    public void getNetworkRxTxTracing() {
+
+        ConnectivityManager connManager;
+        connManager = (ConnectivityManager) RYLA.getInstance().getContext().getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo mNetwork = connManager.getActiveNetworkInfo();
+
+        Log.d("NETWORK NAME", mNetwork.getTypeName());
+
+        long mRX = TrafficStats.getMobileRxBytes();
+        long mTX = TrafficStats.getMobileTxBytes();
+
+        if (mRX == TrafficStats.UNSUPPORTED || mTX == TrafficStats.UNSUPPORTED) {
+            Log.d("NETWORK USAGE", "지원안함");
+        } else {
+            Log.d("NETWORK USAGE", "Rx: " + mRX + ", Tx: " + mTX);
+        }
+    }
 
     public void startTouchTracing(Context mApplication) {
         // 이방법으로 하면 ACTION 의 이름을 가져올수 없음
@@ -241,8 +261,6 @@ public class RylaInstrumentation extends Instrumentation {
         public boolean onTouch(View v, MotionEvent event) {
             Log.d("TOUCH INFO", event.toString());
             Log.d("TOUCH INFO", event.getX()+"("+event.getRawX()+")" +"/"+ event.getY()+"("+event.getRawY()+")");
-            if(event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP)
-                Log.i(TAG, "Action :" + event.getAction() + "\t X :" + event.getRawX() + "\t Y :"+ event.getRawY());
             return false;
         }
     };
