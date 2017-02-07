@@ -5,6 +5,9 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.os.Debug;
 import android.util.Log;
 import android.view.Gravity;
@@ -19,7 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
+import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.WINDOW_SERVICE;
 import static com.lantern.lantern.RYLA.isAppForeground;
@@ -42,7 +45,7 @@ public class RylaInstrumentation extends Instrumentation {
 
     public RylaInstrumentation() {
         SharedPreferences pref = RYLA.getInstance().getContext().getSharedPreferences("pref", MODE_PRIVATE);
-        dumpTerm = pref.getInt("dump_term", 60000);
+        dumpTerm = pref.getInt("dump_term", 1000);
     }
 
     // Instrumentation 초기화 실행
@@ -109,6 +112,12 @@ public class RylaInstrumentation extends Instrumentation {
                     continue;
                 }
 
+                // 시작시간
+                Log.d("DUMP TIME", "====== "+System.currentTimeMillis() +" =======");
+
+                // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
+                RYLA.getInstance().getThreadTracing();
+
                 for (Activity activity : RYLA.getInstance().getActivityList()) {
                     Log.d("ACTIVITIES", activity.getClass().getSimpleName());
                 }
@@ -130,6 +139,9 @@ public class RylaInstrumentation extends Instrumentation {
 
                 // top 방식 아닌 직접 가져오는 방식 사용
                 Log.d("CPU INFO", readUsage2());
+
+                // 종료시간
+                Log.d("DUMP TIME", "====== "+System.currentTimeMillis() +" =======");
             }
             try {
                 Thread.sleep(dumpTerm);
