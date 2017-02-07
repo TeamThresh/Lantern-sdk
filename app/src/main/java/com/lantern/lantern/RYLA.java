@@ -165,7 +165,7 @@ public class RYLA {
                 // 액티비티 스택이 0 이면 실행중인 화면이 없으므로 자원 수집 멈춤
                 // TODO 이시점에도 해당 Process 는 남아있음, Process 종료시점에 맞추어 Destroy 시켜야함
                 RylaInstrumentation.getInstance().setResThreadAlive(false);
-            }
+            } 
         }
     };
 
