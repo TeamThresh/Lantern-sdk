@@ -81,12 +81,17 @@ public class RYLA {
     }
 
     // Thread Stack 가져옴
-    public void getThreadTracing() {
+    public List<String> getThreadTracing() {
+        List<String> stackTraceLines = new ArrayList<>();
+
         Thread t = Looper.getMainLooper().getThread();
         StackTraceElement[] stackTraceList = t.getStackTrace();
         for(StackTraceElement stackTrace : stackTraceList) {
             Log.d("STACK TRACE", stackTrace.toString());
+            stackTraceLines.add(stackTrace.toString());
         }
+
+        return stackTraceLines;
 
         // 현재 쓰레드 스택트레이스
         /*************************

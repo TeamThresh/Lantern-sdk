@@ -17,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.lantern.lantern.dump.DumpFileManager;
+import com.lantern.lantern.dump.ShallowDumpData;
 
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -116,18 +117,28 @@ public class RylaInstrumentation extends Instrumentation {
                     continue;
                 }
 
+                //Dataset for dump file
+                Long dumpStartTime, dumpEndTime;
+                List<Long> cpuInfoList;
+                List<Long> memoryInfoList;
+                List<String> activityStackList = new ArrayList<>();
+                List<String> networkUsageList;
+                List<String> stackTraceInfo;
+
                 // 시작시간
-                Log.d("DUMP TIME", "====== "+System.currentTimeMillis() +" =======");
+                dumpStartTime = System.currentTimeMillis();
+                Log.d("DUMP TIME", "====== "+ dumpStartTime +" =======");
 
                 // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
-                RYLA.getInstance().getThreadTracing();
+                stackTraceInfo = RYLA.getInstance().getThreadTracing();
 
                 for (Activity activity : RYLA.getInstance().getActivityList()) {
                     Log.d("ACTIVITIES", activity.getClass().getSimpleName());
+                    activityStackList.add(activity.getClass().getSimpleName());
                 }
 
                 // NETWORK USAGE INFO
-                getNetworkRxTxTracing();
+                networkUsageList = getNetworkRxTxTracing();
 
                 // MEMORY INFO
                 Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
@@ -140,12 +151,27 @@ public class RylaInstrumentation extends Instrumentation {
                         memoryInfo);
 
                 resDumpData.printMemoryInfo();
+                memoryInfoList = resDumpData.getMemoryInfoForDump();
 
                 // top 방식 아닌 직접 가져오는 방식 사용
-                Log.d("CPU INFO", readUsage2());
+                cpuInfoList = readUsage3();
 
                 // 종료시간
-                Log.d("DUMP TIME", "====== "+System.currentTimeMillis() +" =======");
+                dumpEndTime = System.currentTimeMillis();
+                Log.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
+
+                //save res dump file
+                DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveResDumpData(
+                        new ShallowDumpData(
+                                dumpStartTime,
+                                dumpEndTime,
+                                cpuInfoList,
+                                memoryInfoList,
+                                activityStackList,
+                                networkUsageList,
+                                stackTraceInfo
+                        )
+                );
             }
             try {
                 Thread.sleep(dumpTerm);
@@ -224,22 +250,67 @@ public class RylaInstrumentation extends Instrumentation {
         return "none";
     }
 
-    public void getNetworkRxTxTracing() {
+    private List<Long> readUsage3() {
+        List<Long> cpuInfoList = new ArrayList<>();
+        try {
+            RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
+            String load = reader.readLine();
+
+            List<String> toks = new LinkedList<String>(Arrays.asList(load.split(" +")));  // Split on one or more spaces
+            toks.remove(0);
+
+            List<Long> usages2 = new ArrayList<>();
+            for (String token : toks) {
+                usages2.add(Long.parseLong(token));
+            }
+
+            if (usages1.isEmpty()) {
+                usages1 = usages2;
+                cpuInfoList.add(-1L);
+                return cpuInfoList;
+            }
+
+            // user nice system idle iowait  irq  softirq steal guest guest_nice
+            String rtn = "\nuser\tnice\tsystem\tidle\tiowait\tirq\tsoftirq\tsteal\tguest\tguest_nice\n";
+            for (int i = 0; i < usages1.size(); i++) {
+                rtn += (usages2.get(i) - usages1.get(i)) + "\t\t";
+                cpuInfoList.add(usages2.get(i) - usages1.get(i));
+            }
+
+            Log.d("CPU INFO", rtn);
+            usages1 = usages2;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return cpuInfoList;
+    }
+
+    public List<String> getNetworkRxTxTracing() {
+        List<String> rxtxInfo = new ArrayList<>();
 
         ConnectivityManager connManager;
         connManager = (ConnectivityManager) RYLA.getInstance().getContext().getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo mNetwork = connManager.getActiveNetworkInfo();
 
         Log.d("NETWORK NAME", mNetwork.getTypeName());
+        rxtxInfo.add(mNetwork.getTypeName());
 
         long mRX = TrafficStats.getMobileRxBytes();
         long mTX = TrafficStats.getMobileTxBytes();
 
         if (mRX == TrafficStats.UNSUPPORTED || mTX == TrafficStats.UNSUPPORTED) {
             Log.d("NETWORK USAGE", "지원안함");
+            rxtxInfo.add("-1");
+            rxtxInfo.add("-1");
         } else {
             Log.d("NETWORK USAGE", "Rx: " + mRX + ", Tx: " + mTX);
+            rxtxInfo.add(Long.toString(mRX));
+            rxtxInfo.add(Long.toString(mRX));
         }
+
+        return rxtxInfo;
     }
 
     public void startTouchTracing(Context mApplication) {

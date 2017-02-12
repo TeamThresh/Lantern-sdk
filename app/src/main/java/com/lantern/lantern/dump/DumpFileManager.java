@@ -11,7 +11,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -46,17 +45,16 @@ public class DumpFileManager {
         return dumpFileManager;
     }
 
+    //덤프 파일 생성하기 및 덤프 헤더 파일에 저장하기
     public void initDumpFile() {
+        //덤프 헤더 파일 작성
         dumpJson = getDumpHeader();
 
-        //Log.d(TAG, dumpJson.toString());
-
-        saveDumpHeader(dumpJson.toString());
-
-        //Log.d(TAG, readDumpFile());
-
+        //덤프 헤더를 파일에 저장
+        saveDumpFile(dumpJson.toString());
     }
 
+    //덤프 헤더 JSON 생성하기
     private JSONObject getDumpHeader() {
         JSONObject dumpData = new JSONObject();
         JSONObject deviceInfo = new JSONObject();
@@ -80,45 +78,6 @@ public class DumpFileManager {
         return dumpData;
     }
 
-    private void saveDumpHeader(String dumpHeaderString) {
-        FileOutputStream outputStream;
-
-        try {
-            outputStream = mContext.openFileOutput(DUMP_FILE_NAME, Context.MODE_PRIVATE);
-            outputStream.write(dumpHeaderString.getBytes());
-            outputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String readDumpFile() {
-        FileInputStream inputStream;
-        StringBuffer buffer = new StringBuffer();
-        int readCount = 0;
-
-        try {
-            String inputStr;
-            inputStream = mContext.openFileInput(DUMP_FILE_NAME);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            inputStr = reader.readLine();
-
-            while(inputStr != null) {
-                buffer.append(inputStr + "\n");
-                inputStr = reader.readLine();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return buffer.toString();
-    }
-
     private String getAppVersion() {
         String version = "";
         try {
@@ -129,5 +88,125 @@ public class DumpFileManager {
         }
 
         return version;
+    }
+
+    //덤프 파일에 저장하기
+    //JSON 형식의 String을 파일에 저장
+    private void saveDumpFile(String dumpFileString) {
+        FileOutputStream outputStream;
+
+        try {
+            outputStream = mContext.openFileOutput(DUMP_FILE_NAME, Context.MODE_PRIVATE);
+            outputStream.write(dumpFileString.getBytes());
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //덤프 파일 읽어오기
+    private String readDumpFile() {
+        FileInputStream inputStream;
+        StringBuilder builder = new StringBuilder();
+
+        try {
+            String inputStr;
+            inputStream = mContext.openFileInput(DUMP_FILE_NAME);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            inputStr = reader.readLine();
+
+            while(inputStr != null) {
+                //buffer.append(inputStr + "\n");
+                builder.append(inputStr + "\n");
+                inputStr = reader.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return builder.toString();
+    }
+
+    //type이 res인 dump data 파일에 저장하기
+    public void saveResDumpData(ShallowDumpData shallowDumpData) {
+        JSONObject resDumpJson = getResDumpData(shallowDumpData);
+        JSONObject preSavedDumpData;
+
+        try {
+            preSavedDumpData = new JSONObject(readDumpFile());
+            preSavedDumpData.getJSONArray("data").put(resDumpJson);
+            saveDumpFile(preSavedDumpData.toString());
+
+            Log.d(TAG, new JSONObject(readDumpFile()).toString(2));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //type이 res인 dump JSON object 생성하기
+    private JSONObject getResDumpData(ShallowDumpData shallowDumpData) {
+        JSONObject resData = new JSONObject();
+        JSONObject durationData = new JSONObject();
+        JSONObject cpuData = new JSONObject();
+        JSONObject memoryData = new JSONObject();
+        JSONArray activiyData = new JSONArray();
+        JSONObject networkData = new JSONObject();
+
+        try {
+            //type
+            resData.put("type", "res");
+
+            //duration_time
+            durationData.put("start", shallowDumpData.getStartTime());
+            durationData.put("end", shallowDumpData.getEndTime());
+            resData.put("duration_time", durationData);
+
+            //cpu
+            String[] labelCpu = {"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"};
+            for(int i=0;i<labelCpu.length;i++) {
+                try {
+                    cpuData.put(labelCpu[i], shallowDumpData.getCpuInfo().get(i));
+                } catch(IndexOutOfBoundsException e) {
+                    cpuData.put(labelCpu[i], -1);
+                }
+            }
+            resData.put("cpu", cpuData);
+
+            //memory
+            String[] labelMemory = {"max", "total", "alloc", "free"};
+            for(int i=0;i<labelMemory.length;i++) {
+                memoryData.put(labelMemory[i], shallowDumpData.getMemoryInfo().get(i));
+            }
+            resData.put("memory", memoryData);
+
+            //battery
+            resData.put("battery", "battery stat");
+
+            //activity_stack
+            for(int i=0;i<shallowDumpData.getActivityStackInfo().size();i++) {
+                activiyData.put(shallowDumpData.getActivityStackInfo().get(i));
+            }
+            resData.put("activity_stack", activiyData);
+
+            //network_usage
+            String[] labelNetwork = {"type", "rx", "tx"};
+            for(int i=0;i<labelNetwork.length;i++) {
+                if(i==0) {
+                    networkData.put(labelNetwork[i], shallowDumpData.getNetworkUsageInfo().get(i));
+                } else {
+                    networkData.put(labelNetwork[i], Long.parseLong(shallowDumpData.getNetworkUsageInfo().get(i)));
+                }
+            }
+            resData.put("network_usage", networkData);
+
+            //thread_trace
+            resData.put("thread_trace", "traced list");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return resData;
     }
 }

@@ -3,6 +3,9 @@ package com.lantern.lantern;
 import android.os.Debug;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by YS on 2017-01-25.
  */
@@ -53,5 +56,16 @@ public class ResDumpData {
         //Log.d(TAG, ""+memoryInfo.getTotalSharedClean());
 
         Log.d(TAG, "========= END memory info =========");
+    }
+
+    public List<Long> getMemoryInfoForDump() {
+        List<Long> memoryInfoList = new ArrayList<>();
+
+        memoryInfoList.add(Runtime.getRuntime().maxMemory());
+        memoryInfoList.add(Runtime.getRuntime().totalMemory());
+        memoryInfoList.add(Runtime.getRuntime().freeMemory());
+        memoryInfoList.add(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+
+        return memoryInfoList;
     }
 }
