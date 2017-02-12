@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.lantern.lantern.dump.DumpFileManager;
+
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +47,7 @@ public class RylaInstrumentation extends Instrumentation {
 
     public RylaInstrumentation() {
         SharedPreferences pref = RYLA.getInstance().getContext().getSharedPreferences("pref", MODE_PRIVATE);
-        dumpTerm = pref.getInt("dump_term", 1000);
+        dumpTerm = pref.getInt("dump_term", 10000);
     }
 
     // Instrumentation 초기화 실행
@@ -63,6 +65,8 @@ public class RylaInstrumentation extends Instrumentation {
 
     public void excute() {
         isResThreadAlive = true;
+
+        DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
 
         if (rylaInstrumentation != null) {
             rylaInstrumentation.start();
@@ -241,31 +245,31 @@ public class RylaInstrumentation extends Instrumentation {
     public void startTouchTracing(Context mApplication) {
         // 이방법으로 하면 ACTION 의 이름을 가져올수 없음
 
-        mWindowManager = (WindowManager) mApplication.getSystemService(WINDOW_SERVICE);
-        touchLayout = new LinearLayout(mApplication);
-
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(1, WindowManager.LayoutParams.MATCH_PARENT);
-        touchLayout.setLayoutParams(params);
-        touchLayout.setOnTouchListener(touchListener);
-
-
-        WindowManager.LayoutParams params2 = new WindowManager.LayoutParams(
-                1,  // width
-                1,  // height
-                WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-                PixelFormat.TRANSPARENT
-        );
-        params.gravity = Gravity.LEFT | Gravity.TOP;
-        mWindowManager.addView(touchLayout, params2);
+//        mWindowManager = (WindowManager) mApplication.getSystemService(WINDOW_SERVICE);
+//        touchLayout = new LinearLayout(mApplication);
+//
+//        WindowManager.LayoutParams params = new WindowManager.LayoutParams(1, WindowManager.LayoutParams.MATCH_PARENT);
+//        touchLayout.setLayoutParams(params);
+//        touchLayout.setOnTouchListener(touchListener);
+//
+//
+//        WindowManager.LayoutParams params2 = new WindowManager.LayoutParams(
+//                1,  // width
+//                1,  // height
+//                WindowManager.LayoutParams.TYPE_PHONE,
+//                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+//                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+//                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+//                PixelFormat.TRANSPARENT
+//        );
+//        params.gravity = Gravity.LEFT | Gravity.TOP;
+//        mWindowManager.addView(touchLayout, params2);
     }
 
     public void stopTouchTracing() {
-        if(mWindowManager != null) {
-            if(touchLayout != null) mWindowManager.removeView(touchLayout);
-        }
+//        if(mWindowManager != null) {
+//            if(touchLayout != null) mWindowManager.removeView(touchLayout);
+//        }
     }
 
     private View.OnTouchListener touchListener = new View.OnTouchListener() {
