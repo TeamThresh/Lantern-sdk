@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.lantern.lantern.dump.DataUploadTask;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.ShallowDumpData;
 
@@ -58,6 +59,7 @@ public class RylaInstrumentation extends Instrumentation {
     private boolean isResThreadAlive = false;
 
     public static RylaInstrumentation getInstance() {
+        Log.d("RylaInstrumentation", "getInstance");
         if (rylaInstrumentation == null) {
             rylaInstrumentation = new RylaInstrumentation();
         }
@@ -65,9 +67,10 @@ public class RylaInstrumentation extends Instrumentation {
     }
 
     public void excute() {
+        Log.d("RylaInstrumentation", "excute");
         isResThreadAlive = true;
 
-        DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+        new DataUploadTask(RYLA.getInstance().getContext()).execute();
 
         if (rylaInstrumentation != null) {
             rylaInstrumentation.start();
@@ -94,6 +97,7 @@ public class RylaInstrumentation extends Instrumentation {
 
         // 터치
         if (isAlive) {
+            new DataUploadTask(RYLA.getInstance().getContext()).execute();
             startTouchTracing(RYLA.getInstance().getContext());
         } else {
             stopTouchTracing();

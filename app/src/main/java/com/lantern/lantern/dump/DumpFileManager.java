@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 
+import com.lantern.lantern.dump.ShallowDumpData;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +49,7 @@ public class DumpFileManager {
 
     //덤프 파일 생성하기 및 덤프 헤더 파일에 저장하기
     public void initDumpFile() {
+        Log.d(TAG,"initDumpFile");
         //덤프 헤더 파일 작성
         dumpJson = getDumpHeader();
 
@@ -63,6 +66,7 @@ public class DumpFileManager {
             dumpData.put("launch_time", System.currentTimeMillis());
             dumpData.put("dump_interval", mContext.getSharedPreferences("pref", MODE_PRIVATE).getInt("dump_term", 1000));
             dumpData.put("package_name", mContext.getPackageName());
+
 
             deviceInfo.put("os", Build.VERSION.RELEASE);
             deviceInfo.put("app", getAppVersion());
@@ -105,7 +109,7 @@ public class DumpFileManager {
     }
 
     //덤프 파일 읽어오기
-    private String readDumpFile() {
+    public String readDumpFile() {
         FileInputStream inputStream;
         StringBuilder builder = new StringBuilder();
 
@@ -150,7 +154,7 @@ public class DumpFileManager {
         JSONObject durationData = new JSONObject();
         JSONObject cpuData = new JSONObject();
         JSONObject memoryData = new JSONObject();
-        JSONArray activiyData = new JSONArray();
+        JSONArray activityData = new JSONArray();
         JSONObject networkData = new JSONObject();
 
         try {
@@ -181,13 +185,13 @@ public class DumpFileManager {
             resData.put("memory", memoryData);
 
             //battery
-            resData.put("battery", "battery stat");
+            resData.put("battery", 10);
 
             //activity_stack
             for(int i=0;i<shallowDumpData.getActivityStackInfo().size();i++) {
-                activiyData.put(shallowDumpData.getActivityStackInfo().get(i));
+                activityData.put(shallowDumpData.getActivityStackInfo().get(i));
             }
-            resData.put("activity_stack", activiyData);
+            resData.put("activity_stack", activityData);
 
             //network_usage
             String[] labelNetwork = {"type", "rx", "tx"};

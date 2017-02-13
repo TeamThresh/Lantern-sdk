@@ -75,6 +75,7 @@ public class RYLA {
 
     // Res 덤프 시작
     public void startResDump() {
+        Log.d("RYLA", "startResDump()");
         // Instrumentation 실행
         // Instrumentation 에서 CPU, Memory, Battery, 화면 클릭 가져옴
         RylaInstrumentation.getInstance().excute();
@@ -170,7 +171,8 @@ public class RYLA {
                 // 액티비티 스택이 0 이면 실행중인 화면이 없으므로 자원 수집 멈춤
                 // TODO 이시점에도 해당 Process 는 남아있음, Process 종료시점에 맞추어 Destroy 시켜야함
                 RylaInstrumentation.getInstance().setResThreadAlive(false);
-            } 
+                //RylaInstrumentation.getInstance().stop();
+            }
         }
     };
 

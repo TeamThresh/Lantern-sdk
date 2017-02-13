@@ -1,6 +1,14 @@
 package com.lantern.lantern;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.provider.ContactsContract;
+import android.util.Log;
+
+import com.lantern.lantern.dump.DumpFileManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -20,21 +28,39 @@ public class DataUploadManager {
     URL Url;
 
     // TODO Constants 만들어서 상수 관리
-    String strURL = "http://www.naver.com"; //탐색하고 싶은 URL이다.
+    //String strURL = "http://www.naver.com"; //탐색하고 싶은 URL이다.
+    private final String strURL = "https://52.78.70.54:9500/test";
     // TODO 파일 위치 결정
     String strFilePath = "pathName";
 
-    String result;
+    JSONObject result;
+
+    private final String TAG = "DumpFileManager";
+    private Context mContext;
+
+    private static DataUploadManager dataUploadManager;
+
+    public DataUploadManager(Context context) {
+        mContext = context;
+    }
+
+    public static DataUploadManager getInstance(Context context) {
+        if(dataUploadManager == null) {
+            dataUploadManager = new DataUploadManager(context.getApplicationContext());
+        }
+
+        return dataUploadManager;
+    }
 
     public void sendData(final String httpMethod) {
-        new AsyncTask<Void,Void,Void>(){
+        new AsyncTask<String,Void,JSONObject>(){
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
             }
 
             @Override
-            protected Void doInBackground(Void... voids) {
+            protected JSONObject doInBackground(String... values) {
                 try {
                     Url = new URL(strURL);
                     HttpURLConnection conn = (HttpURLConnection) Url.openConnection(); // connection 객체 생성
@@ -74,17 +100,21 @@ public class DataUploadManager {
                     */
 
 
-                    InputStream is = conn.getInputStream(); //input스트림 개방
+//                    InputStream is = conn.getInputStream(); //input스트림 개방
+//
+//                    StringBuilder builder = new StringBuilder(); //문자열을 담기 위한 객체
+//                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8")); //문자열 셋 세팅
+//                    String line;
+//
+//                    while ((line = reader.readLine()) != null) {
+//                        builder.append(line + "\n");
+//                    }
 
-                    StringBuilder builder = new StringBuilder(); //문자열을 담기 위한 객체
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8")); //문자열 셋 세팅
-                    String line;
+                    String requestData = DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpFile();
 
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line + "\n");
-                    }
+                    //result = builder.toString();
 
-                    result = builder.toString();
+                    result = new JSONObject(requestData);
 
                 } catch (MalformedURLException | ProtocolException exception) {
                     exception.printStackTrace();
@@ -93,13 +123,24 @@ public class DataUploadManager {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                return null;
+
+                return result;
             }
 
+//            @Override
+//            protected void onPostExecute(Void aVoid) {
+//                super.onPostExecute(aVoid);
+//                System.out.println(result);
+//            }
+
             @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                System.out.println(result);
+            protected void onPostExecute(JSONObject result) {
+                try {
+                    String rtnCode = result.get("message").toString();
+                    Log.d(TAG, "rtnCode : " + rtnCode);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }.execute();
 
