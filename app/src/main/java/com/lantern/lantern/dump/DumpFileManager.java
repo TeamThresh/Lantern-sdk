@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -12,10 +13,10 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.UUID;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -68,6 +69,7 @@ public class DumpFileManager {
             deviceInfo.put("app", getAppVersion());
             deviceInfo.put("device", Build.DEVICE);
             deviceInfo.put("brand", Build.BRAND);
+            deviceInfo.put("UUID", getDevicesUUID());
 
             dumpData.put("device_info", deviceInfo);
             dumpData.put("data", dumpContents);
@@ -88,6 +90,18 @@ public class DumpFileManager {
         }
 
         return version;
+    }
+
+    private String getDevicesUUID(){
+        final TelephonyManager tm = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        final String tmDevice, tmSerial, androidId;
+        tmDevice = "" + tm.getDeviceId();
+        tmSerial = "" + tm.getSimSerialNumber();
+        androidId = "" + android.provider.Settings.Secure.getString(mContext.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        String deviceId = deviceUuid.toString();
+
+        return deviceId;
     }
 
     //덤프 파일에 저장하기
