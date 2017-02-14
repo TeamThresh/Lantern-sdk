@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 
+import com.lantern.lantern.dump.ActivityRenderData;
+import com.lantern.lantern.dump.DumpFileManager;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
@@ -119,14 +122,28 @@ public class RYLA {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            Log.d("Lifecycle", "CREATED");
+            // 호출 시간 dump
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.CREATED,
+                            System.currentTimeMillis())
+            );
+
             activityList.add(activity);
             Log.d("ACTIVITIES", "Add : "+activity.getClass().getSimpleName());
         }
 
         @Override
         public void onActivityStarted(Activity activity) {
-            Log.d("Activity Life", "Started");
+            Log.d("Lifecycle", "Started");
             RYLA.getInstance().getThreadTracing();
+
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.STARTED,
+                            System.currentTimeMillis())
+            );
 
             // 백그라운드에서 포그라운드로 넘어온 경우
             if (isAppForeground() && !RylaInstrumentation.getInstance().isResThreadAlive()) {
@@ -137,12 +154,21 @@ public class RYLA {
 
         @Override
         public void onActivityResumed(Activity activity) {
-            Log.d("Activity Life", "Resumed");
+            Log.d("Lifecycle", "Resumed");
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.RESUMED,
+                            System.currentTimeMillis())
+            );
         }
 
         @Override
         public void onActivityPaused(Activity activity) {
-
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.PAUSED,
+                            System.currentTimeMillis())
+            );
             // 포그라운드에서 백그라운드로 넘어가는 경우
             // TODO 이게 호출되는 시점은 항상 포그라운드 이기 때문에 소용 없음, 루프에서 체크
             if (!isAppForeground() && RylaInstrumentation.getInstance().isResThreadAlive()) {
@@ -153,7 +179,11 @@ public class RYLA {
 
         @Override
         public void onActivityStopped(Activity activity) {
-
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.STOPPED,
+                            System.currentTimeMillis())
+            );
         }
 
         @Override
@@ -163,6 +193,12 @@ public class RYLA {
 
         @Override
         public void onActivityDestroyed(Activity activity) {
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.DESTROYED,
+                            System.currentTimeMillis())
+            );
+
             activityList.remove(activity);
             Log.d("ACTIVITIES", "Delete : "+activity.getClass().getSimpleName());
 
@@ -170,7 +206,7 @@ public class RYLA {
                 // 액티비티 스택이 0 이면 실행중인 화면이 없으므로 자원 수집 멈춤
                 // TODO 이시점에도 해당 Process 는 남아있음, Process 종료시점에 맞추어 Destroy 시켜야함
                 RylaInstrumentation.getInstance().setResThreadAlive(false);
-            } 
+            }
         }
     };
 

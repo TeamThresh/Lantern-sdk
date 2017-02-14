@@ -128,9 +128,9 @@ public class DumpFileManager {
         return builder.toString();
     }
 
-    //type이 res인 dump data 파일에 저장하기
-    public void saveResDumpData(ShallowDumpData shallowDumpData) {
-        JSONObject resDumpJson = getResDumpData(shallowDumpData);
+    //dump data 파일에 저장하기
+    public void saveDumpData(DumpData dumpData) {
+        JSONObject resDumpJson = dumpData.getDumpData();
         JSONObject preSavedDumpData;
 
         try {
@@ -142,71 +142,5 @@ public class DumpFileManager {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    //type이 res인 dump JSON object 생성하기
-    private JSONObject getResDumpData(ShallowDumpData shallowDumpData) {
-        JSONObject resData = new JSONObject();
-        JSONObject durationData = new JSONObject();
-        JSONObject cpuData = new JSONObject();
-        JSONObject memoryData = new JSONObject();
-        JSONArray activiyData = new JSONArray();
-        JSONObject networkData = new JSONObject();
-
-        try {
-            //type
-            resData.put("type", "res");
-
-            //duration_time
-            durationData.put("start", shallowDumpData.getStartTime());
-            durationData.put("end", shallowDumpData.getEndTime());
-            resData.put("duration_time", durationData);
-
-            //cpu
-            String[] labelCpu = {"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"};
-            for(int i=0;i<labelCpu.length;i++) {
-                try {
-                    cpuData.put(labelCpu[i], shallowDumpData.getCpuInfo().get(i));
-                } catch(IndexOutOfBoundsException e) {
-                    cpuData.put(labelCpu[i], -1);
-                }
-            }
-            resData.put("cpu", cpuData);
-
-            //memory
-            String[] labelMemory = {"max", "total", "alloc", "free"};
-            for(int i=0;i<labelMemory.length;i++) {
-                memoryData.put(labelMemory[i], shallowDumpData.getMemoryInfo().get(i));
-            }
-            resData.put("memory", memoryData);
-
-            //battery
-            resData.put("battery", "battery stat");
-
-            //activity_stack
-            for(int i=0;i<shallowDumpData.getActivityStackInfo().size();i++) {
-                activiyData.put(shallowDumpData.getActivityStackInfo().get(i));
-            }
-            resData.put("activity_stack", activiyData);
-
-            //network_usage
-            String[] labelNetwork = {"type", "rx", "tx"};
-            for(int i=0;i<labelNetwork.length;i++) {
-                if(i==0) {
-                    networkData.put(labelNetwork[i], shallowDumpData.getNetworkUsageInfo().get(i));
-                } else {
-                    networkData.put(labelNetwork[i], Long.parseLong(shallowDumpData.getNetworkUsageInfo().get(i)));
-                }
-            }
-            resData.put("network_usage", networkData);
-
-            //thread_trace
-            resData.put("thread_trace", "traced list");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return resData;
     }
 }

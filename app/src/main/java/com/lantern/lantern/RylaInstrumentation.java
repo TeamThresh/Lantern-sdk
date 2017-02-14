@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.PixelFormat;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
 import android.os.Debug;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -27,7 +25,6 @@ import java.util.List;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
-import static android.content.Context.WINDOW_SERVICE;
 import static com.lantern.lantern.RYLA.isAppForeground;
 
 /**
@@ -161,7 +158,7 @@ public class RylaInstrumentation extends Instrumentation {
                 Log.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
 
                 //save res dump file
-                DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveResDumpData(
+                DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                         new ShallowDumpData(
                                 dumpStartTime,
                                 dumpEndTime,

@@ -1,12 +1,16 @@
 package com.lantern.lantern.dump;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 
 /**
  * Created by yky on 2017. 2. 13..
  */
 
-public class ShallowDumpData {
+public class ShallowDumpData implements DumpData {
     private Long startTime;
     private Long endTime;
     private List<Long> cpuInfo;
@@ -83,5 +87,72 @@ public class ShallowDumpData {
 
     public void setStackTraceinfo(List<String> stackTraceinfo) {
         this.stackTraceinfo = stackTraceinfo;
+    }
+
+    @Override
+    //type이 res인 dump JSON object 생성하기
+    public JSONObject getDumpData() {
+        JSONObject resData = new JSONObject();
+        JSONObject durationData = new JSONObject();
+        JSONObject cpuData = new JSONObject();
+        JSONObject memoryData = new JSONObject();
+        JSONArray activiyData = new JSONArray();
+        JSONObject networkData = new JSONObject();
+
+        try {
+            //type
+            resData.put("type", "res");
+
+            //duration_time
+            durationData.put("start", getStartTime());
+            durationData.put("end", getEndTime());
+            resData.put("duration_time", durationData);
+
+            //cpu
+            String[] labelCpu = {"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"};
+            for(int i=0;i<labelCpu.length;i++) {
+                try {
+                    cpuData.put(labelCpu[i], getCpuInfo().get(i));
+                } catch(IndexOutOfBoundsException e) {
+                    cpuData.put(labelCpu[i], -1);
+                }
+            }
+            resData.put("cpu", cpuData);
+
+            //memory
+            String[] labelMemory = {"max", "total", "alloc", "free"};
+            for(int i=0;i<labelMemory.length;i++) {
+                memoryData.put(labelMemory[i], getMemoryInfo().get(i));
+            }
+            resData.put("memory", memoryData);
+
+            //battery
+            resData.put("battery", "battery stat");
+
+            //activity_stack
+            for(int i=0;i<getActivityStackInfo().size();i++) {
+                activiyData.put(getActivityStackInfo().get(i));
+            }
+            resData.put("activity_stack", activiyData);
+
+            //network_usage
+            String[] labelNetwork = {"type", "rx", "tx"};
+            for(int i=0;i<labelNetwork.length;i++) {
+                if(i==0) {
+                    networkData.put(labelNetwork[i], getNetworkUsageInfo().get(i));
+                } else {
+                    networkData.put(labelNetwork[i], Long.parseLong(getNetworkUsageInfo().get(i)));
+                }
+            }
+            resData.put("network_usage", networkData);
+
+            //thread_trace
+            resData.put("thread_trace", "traced list");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return resData;
     }
 }
