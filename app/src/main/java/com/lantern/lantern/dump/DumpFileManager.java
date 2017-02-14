@@ -48,6 +48,7 @@ public class DumpFileManager {
 
     //덤프 파일 생성하기 및 덤프 헤더 파일에 저장하기
     public void initDumpFile() {
+        Log.d(TAG,"initDumpFile");
         //덤프 헤더 파일 작성
         dumpJson = getDumpHeader();
 
@@ -64,6 +65,7 @@ public class DumpFileManager {
             dumpData.put("launch_time", System.currentTimeMillis());
             dumpData.put("dump_interval", mContext.getSharedPreferences("pref", MODE_PRIVATE).getInt("dump_term", 1000));
             dumpData.put("package_name", mContext.getPackageName());
+
 
             deviceInfo.put("os", Build.VERSION.RELEASE);
             deviceInfo.put("app", getAppVersion());
@@ -119,7 +121,7 @@ public class DumpFileManager {
     }
 
     //덤프 파일 읽어오기
-    private String readDumpFile() {
+    public String readDumpFile() {
         FileInputStream inputStream;
         StringBuilder builder = new StringBuilder();
 

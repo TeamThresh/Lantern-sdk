@@ -78,6 +78,7 @@ public class RYLA {
 
     // Res 덤프 시작
     public void startResDump() {
+        Log.d("RYLA", "startResDump()");
         // Instrumentation 실행
         // Instrumentation 에서 CPU, Memory, Battery, 화면 클릭 가져옴
         RylaInstrumentation.getInstance().excute();
