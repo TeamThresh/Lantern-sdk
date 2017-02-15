@@ -191,7 +191,8 @@ public class ShallowDumpData implements DumpData {
         JSONObject appData = new JSONObject();
         JSONObject cpuAppData = new JSONObject();
         JSONObject memoryData = new JSONObject();
-        JSONArray activiyData = new JSONArray();
+        JSONArray activityData = new JSONArray();
+        JSONArray stackTraceData = new JSONArray();
 
         try {
             // cpu app
@@ -217,13 +218,16 @@ public class ShallowDumpData implements DumpData {
 
             //activity_stack
             for(int i=0;i<getActivityStackInfo().size();i++) {
-                activiyData.put(getActivityStackInfo().get(i));
+                activityData.put(getActivityStackInfo().get(i));
             }
-            appData.put("activity_stack", activiyData);
+            appData.put("activity_stack", activityData);
 
 
             //thread_trace
-            appData.put("thread_trace", "traced list");
+            for(int i=0;i<getStackTraceinfo().size();i++) {
+                stackTraceData.put(getStackTraceinfo().get(i));
+            }
+            appData.put("thread_trace", stackTraceData);
         } catch (JSONException e) {
             e.printStackTrace();
         }
