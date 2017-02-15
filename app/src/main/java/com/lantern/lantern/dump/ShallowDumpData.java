@@ -14,6 +14,8 @@ public class ShallowDumpData implements DumpData {
     private Long startTime;
     private Long endTime;
     private List<Long> cpuInfo;
+    private List<String> cpuAppInfo;
+    private List<String> vmstatInfo;
     private List<Long> memoryInfo;
     private List<String> activityStackInfo;
     private List<String> networkUsageInfo;
@@ -21,16 +23,20 @@ public class ShallowDumpData implements DumpData {
 
 
     public ShallowDumpData(Long startTime, Long endTime, List<Long> cpuInfo,
+                           List<String> cpuAppInfo, List<String> vmstatInfo,
                            List<Long> memoryInfo, List<String> activityStackInfo,
                            List<String> networkUsageInfo, List<String> stackTraceinfo) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.cpuInfo = cpuInfo;
+        this.cpuAppInfo = cpuAppInfo;
+        this.vmstatInfo = vmstatInfo;
         this.memoryInfo = memoryInfo;
         this.activityStackInfo = activityStackInfo;
         this.networkUsageInfo = networkUsageInfo;
         this.stackTraceinfo = stackTraceinfo;
     }
+
 
 
     public Long getStartTime() {
@@ -57,6 +63,21 @@ public class ShallowDumpData implements DumpData {
         this.cpuInfo = cpuInfo;
     }
 
+    public List<String> getCpuAppInfo() {
+        return cpuAppInfo;
+    }
+
+    public void setCpuAppInfo(List<String> cpuAppInfo) {
+        this.cpuAppInfo = cpuAppInfo;
+    }
+
+    public List<String> getVmstatInfo() {
+        return vmstatInfo;
+    }
+
+    public void setVmstatInfo(List<String> vmstatInfo) {
+        this.vmstatInfo = vmstatInfo;
+    }
     public List<Long> getMemoryInfo() {
         return memoryInfo;
     }
@@ -94,10 +115,6 @@ public class ShallowDumpData implements DumpData {
     public JSONObject getDumpData() {
         JSONObject resData = new JSONObject();
         JSONObject durationData = new JSONObject();
-        JSONObject cpuData = new JSONObject();
-        JSONObject memoryData = new JSONObject();
-        JSONArray activiyData = new JSONArray();
-        JSONObject networkData = new JSONObject();
 
         try {
             //type
@@ -108,6 +125,26 @@ public class ShallowDumpData implements DumpData {
             durationData.put("end", getEndTime());
             resData.put("duration_time", durationData);
 
+            // parse os data
+            resData.put("os", getParsedOsData());
+
+            // parse app data
+            resData.put("app", getParsedAppData());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return resData;
+    }
+
+    private JSONObject getParsedOsData() {
+        JSONObject osData = new JSONObject();
+        JSONObject cpuData = new JSONObject();
+        JSONObject vmstatData = new JSONObject();
+        JSONObject networkData = new JSONObject();
+
+        try {
             //cpu
             String[] labelCpu = {"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"};
             for(int i=0;i<labelCpu.length;i++) {
@@ -117,23 +154,21 @@ public class ShallowDumpData implements DumpData {
                     cpuData.put(labelCpu[i], -1);
                 }
             }
-            resData.put("cpu", cpuData);
+            osData.put("cpu", cpuData);
 
-            //memory
-            String[] labelMemory = {"max", "total", "alloc", "free"};
-            for(int i=0;i<labelMemory.length;i++) {
-                memoryData.put(labelMemory[i], getMemoryInfo().get(i));
+            // vmstat
+            String[] labelVmStat= {"r","b","swpd","free","buff","cache","si","so","bi","bo","in","cs","us","sy","id","wa"};
+            for(int i=0;i<labelVmStat.length;i++) {
+                try {
+                    vmstatData.put(labelVmStat[i], getVmstatInfo().get(i));
+                } catch(IndexOutOfBoundsException e) {
+                    vmstatData.put(labelVmStat[i], -1);
+                }
             }
-            resData.put("memory", memoryData);
+            osData.put("vmstat", vmstatData);
 
             //battery
-            resData.put("battery", "battery stat");
-
-            //activity_stack
-            for(int i=0;i<getActivityStackInfo().size();i++) {
-                activiyData.put(getActivityStackInfo().get(i));
-            }
-            resData.put("activity_stack", activiyData);
+            osData.put("battery", 10);
 
             //network_usage
             String[] labelNetwork = {"type", "rx", "tx"};
@@ -144,15 +179,56 @@ public class ShallowDumpData implements DumpData {
                     networkData.put(labelNetwork[i], Long.parseLong(getNetworkUsageInfo().get(i)));
                 }
             }
-            resData.put("network_usage", networkData);
-
-            //thread_trace
-            resData.put("thread_trace", "traced list");
-
+            osData.put("network_usage", networkData);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return resData;
+        return osData;
+    }
+
+    private JSONObject getParsedAppData() {
+        JSONObject appData = new JSONObject();
+        JSONObject cpuAppData = new JSONObject();
+        JSONObject memoryData = new JSONObject();
+        JSONArray activiyData = new JSONArray();
+
+        try {
+            // cpu app
+            String[] labelCpuApp = {"state","ppid","pgrp","session","tty_nr","tpgid","flags","minflt","cminflt" +
+                    "majflt","cmajflt","utime","stime","cutime","cstime","priority","nice","num_threads" +
+                    "itrealvalue","starttime","vsize","rss_","rsslim","startcode","endcode","startstack" +
+                    "kstkesp","kstkeip","signal","blocked","sigignore","sigcatch","wchan","nswap","cnswap" +
+                    "exit_signal","processor","rt_priority","policy","dly_io_tic","guest_time" +
+                    "cguest_time","start_data","enddata","str_brk","arg_str","arg_end","env_str" +
+                    "env_end","ext_cod"};
+            for(int i=0;i<labelCpuApp.length;i++) {
+                cpuAppData.put(labelCpuApp[i], getCpuAppInfo().get(i));
+            }
+            appData.put("cpu_app", cpuAppData);
+
+            //memory
+            String[] labelMemory = {"max", "total", "alloc", "free"};
+            for(int i=0;i<labelMemory.length;i++) {
+                memoryData.put(labelMemory[i], getMemoryInfo().get(i));
+            }
+            appData.put("memory", memoryData);
+
+
+            //activity_stack
+            for(int i=0;i<getActivityStackInfo().size();i++) {
+                activiyData.put(getActivityStackInfo().get(i));
+            }
+            appData.put("activity_stack", activiyData);
+
+
+            //thread_trace
+            appData.put("thread_trace", "traced list");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return appData;
+
     }
 }

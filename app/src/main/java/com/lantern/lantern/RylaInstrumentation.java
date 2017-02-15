@@ -4,27 +4,24 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.TrafficStats;
-import android.os.Debug;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.lantern.lantern.Resource.CPUAppResource;
+import com.lantern.lantern.Resource.CPUResource;
+import com.lantern.lantern.Resource.MemoryResource;
+import com.lantern.lantern.Resource.NetworkResource;
+import com.lantern.lantern.Resource.StatResource;
 import com.lantern.lantern.dump.DataUploadTask;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.ShallowDumpData;
 
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
-import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 import static com.lantern.lantern.RYLA.isAppForeground;
 
@@ -120,10 +117,12 @@ public class RylaInstrumentation extends Instrumentation {
 
                 //Dataset for dump file
                 Long dumpStartTime, dumpEndTime;
-                List<Long> cpuInfoList;
-                List<Long> memoryInfoList;
+                NetworkResource networkInfo;
+                CPUResource cpuInfo;
+                CPUAppResource cpuAppInfo;
+                MemoryResource memoryInfo;
+                StatResource vmstatInfo;
                 List<String> activityStackList = new ArrayList<>();
-                List<String> networkUsageList;
                 List<String> stackTraceInfo;
 
                 // 시작시간
@@ -139,23 +138,25 @@ public class RylaInstrumentation extends Instrumentation {
                 }
 
                 // NETWORK USAGE INFO
-                networkUsageList = getNetworkRxTxTracing();
+                networkInfo = new NetworkResource();
 
                 // MEMORY INFO
-                Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
-                Debug.getMemoryInfo(memoryInfo);
-                ResDumpData resDumpData = new ResDumpData(
-                        Debug.getNativeHeapSize(),
-                        Debug.getNativeHeapFreeSize(),
-                        Debug.getPss(),
-                        Debug.getLoadedClassCount(),
-                        memoryInfo);
+                memoryInfo = new MemoryResource();
 
-                resDumpData.printMemoryInfo();
-                memoryInfoList = resDumpData.getMemoryInfoForDump();
-
+                // CPU INFO
                 // top 방식 아닌 직접 가져오는 방식 사용
-                cpuInfoList = readUsage3();
+                cpuInfo = new CPUResource();
+                cpuAppInfo = new CPUAppResource();
+
+                // vmstat INFO
+                vmstatInfo = new StatResource();
+
+                // Logging
+                Log.d("NETWORK INFO", networkInfo.toString());
+                memoryInfo.printMemoryInfo();
+                Log.d("CPU INFO", cpuInfo.toString());
+                Log.d("CPU APP INFO", cpuAppInfo.toString());
+                Log.d("VMSTAT INFO", vmstatInfo.toString());
 
                 // 종료시간
                 dumpEndTime = System.currentTimeMillis();
@@ -166,10 +167,12 @@ public class RylaInstrumentation extends Instrumentation {
                         new ShallowDumpData(
                                 dumpStartTime,
                                 dumpEndTime,
-                                cpuInfoList,
-                                memoryInfoList,
+                                cpuInfo.toList(),
+                                cpuAppInfo.toList(),
+                                vmstatInfo.toList(),
+                                memoryInfo.toList(),
                                 activityStackList,
-                                networkUsageList,
+                                networkInfo.toList(),
                                 stackTraceInfo
                         )
                 );
@@ -180,138 +183,6 @@ public class RylaInstrumentation extends Instrumentation {
                 e.printStackTrace();
             }
         }
-    }
-
-    private float readUsage() {
-        try {
-            RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
-            String load = reader.readLine();
-
-            String[] toks = load.split(" +");  // Split on one or more spaces
-
-            long idle1 = Long.parseLong(toks[4]);
-            long cpu1 = Long.parseLong(toks[2]) + Long.parseLong(toks[3]) + Long.parseLong(toks[5])
-                    + Long.parseLong(toks[6]) + Long.parseLong(toks[7]) + Long.parseLong(toks[8]);
-
-            try {
-                Thread.sleep(360);
-            } catch (Exception e) {
-            }
-
-            reader.seek(0);
-            load = reader.readLine();
-            reader.close();
-
-            toks = load.split(" +");
-
-            long idle2 = Long.parseLong(toks[4]);
-            long cpu2 = Long.parseLong(toks[2]) + Long.parseLong(toks[3]) + Long.parseLong(toks[5])
-                    + Long.parseLong(toks[6]) + Long.parseLong(toks[7]) + Long.parseLong(toks[8]);
-
-            return (float) (cpu2 - cpu1) / ((cpu2 + idle2) - (cpu1 + idle1));
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return 0;
-    }
-
-    private String readUsage2() {
-        try {
-            RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
-            String load = reader.readLine();
-
-            List<String> toks = new LinkedList<String>(Arrays.asList(load.split(" +")));  // Split on one or more spaces
-            toks.remove(0);
-
-            List<Long> usages2 = new ArrayList<>();
-            for (String token : toks) {
-                usages2.add(Long.parseLong(token));
-            }
-
-            if (usages1.isEmpty()) {
-                usages1 = usages2;
-                return "init";
-            }
-
-            // user nice system idle iowait  irq  softirq steal guest guest_nice
-            String rtn = "\nuser\tnice\tsystem\tidle\tiowait\tirq\tsoftirq\tsteal\tguest\tguest_nice\n";
-            for (int i = 0; i < usages1.size(); i++) {
-                rtn += (usages2.get(i) - usages1.get(i)) + "\t\t";
-            }
-
-            usages1 = usages2;
-            return rtn;
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return "none";
-    }
-
-    private List<Long> readUsage3() {
-        List<Long> cpuInfoList = new ArrayList<>();
-        try {
-            RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
-            String load = reader.readLine();
-
-            List<String> toks = new LinkedList<String>(Arrays.asList(load.split(" +")));  // Split on one or more spaces
-            toks.remove(0);
-
-            List<Long> usages2 = new ArrayList<>();
-            for (String token : toks) {
-                usages2.add(Long.parseLong(token));
-            }
-
-            if (usages1.isEmpty()) {
-                usages1 = usages2;
-                cpuInfoList.add(-1L);
-                return cpuInfoList;
-            }
-
-            // user nice system idle iowait  irq  softirq steal guest guest_nice
-            String rtn = "\nuser\tnice\tsystem\tidle\tiowait\tirq\tsoftirq\tsteal\tguest\tguest_nice\n";
-            for (int i = 0; i < usages1.size(); i++) {
-                rtn += (usages2.get(i) - usages1.get(i)) + "\t\t";
-                cpuInfoList.add(usages2.get(i) - usages1.get(i));
-            }
-
-            Log.d("CPU INFO", rtn);
-            usages1 = usages2;
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return cpuInfoList;
-    }
-
-    public List<String> getNetworkRxTxTracing() {
-        List<String> rxtxInfo = new ArrayList<>();
-
-        ConnectivityManager connManager;
-        connManager = (ConnectivityManager) RYLA.getInstance().getContext().getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo mNetwork = connManager.getActiveNetworkInfo();
-
-        Log.d("NETWORK NAME", mNetwork.getTypeName());
-        rxtxInfo.add(mNetwork.getTypeName());
-
-        long mRX = TrafficStats.getMobileRxBytes();
-        long mTX = TrafficStats.getMobileTxBytes();
-
-        if (mRX == TrafficStats.UNSUPPORTED || mTX == TrafficStats.UNSUPPORTED) {
-            Log.d("NETWORK USAGE", "지원안함");
-            rxtxInfo.add("-1");
-            rxtxInfo.add("-1");
-        } else {
-            Log.d("NETWORK USAGE", "Rx: " + mRX + ", Tx: " + mTX);
-            rxtxInfo.add(Long.toString(mRX));
-            rxtxInfo.add(Long.toString(mRX));
-        }
-
-        return rxtxInfo;
     }
 
     public void startTouchTracing(Context mApplication) {

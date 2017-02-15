@@ -1,4 +1,4 @@
-package com.lantern.lantern;
+package com.lantern.lantern.Resource;
 
 import android.os.Debug;
 import android.util.Log;
@@ -10,8 +10,8 @@ import java.util.List;
  * Created by YS on 2017-01-25.
  */
 
-public class ResDumpData {
-    private static final String TAG = "ResDumpData";
+public class MemoryResource implements Resource {
+    private static final String TAG = "MemoryResource";
 
     private long natHeapSize;
     private long natHeapFreeSize;
@@ -19,12 +19,18 @@ public class ResDumpData {
     private int loadedClassCount;
     private Debug.MemoryInfo memoryInfo;
 
-    public ResDumpData(long natHeapSize, long natHeapFreeSize, long pss, int loadedClassCount, Debug.MemoryInfo memoryInfo) {
-        this.natHeapSize = natHeapSize;
-        this.natHeapFreeSize = natHeapFreeSize;
-        this.pss = pss;
-        this.loadedClassCount = loadedClassCount;
-        this.memoryInfo = memoryInfo;
+    List<Long> memoryInfoList = new ArrayList<>();
+
+    public MemoryResource() {
+        memoryInfoList.clear();
+
+        this.natHeapSize = Debug.getNativeHeapSize();
+        this.natHeapFreeSize = Debug.getNativeHeapFreeSize();
+        this.pss = Debug.getPss();
+        this.loadedClassCount = Debug.getLoadedClassCount();
+
+        this.memoryInfo = new Debug.MemoryInfo();
+        Debug.getMemoryInfo(memoryInfo);
     }
 
     public void printMemoryInfo() {
@@ -58,8 +64,8 @@ public class ResDumpData {
         Log.d(TAG, "========= END memory info =========");
     }
 
-    public List<Long> getMemoryInfoForDump() {
-        List<Long> memoryInfoList = new ArrayList<>();
+    @Override
+    public List<Long> toList() {
 
         memoryInfoList.add(Runtime.getRuntime().maxMemory());
         memoryInfoList.add(Runtime.getRuntime().totalMemory());
@@ -67,5 +73,10 @@ public class ResDumpData {
         memoryInfoList.add(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
 
         return memoryInfoList;
+    }
+
+    @Override
+    public String toString() {
+        return null;
     }
 }
