@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 
+import com.lantern.lantern.dump.ActivityRenderData;
+import com.lantern.lantern.dump.DumpFileManager;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
@@ -22,6 +25,10 @@ import javax.net.ssl.SSLSocket;
 
 public class RYLA {
     private static Application mApplication;
+    private static String activityName;
+    private static long startTime;
+    private static long endTime;
+
 
     RylaInstrumentation rylaInstrumentation;
 
@@ -65,6 +72,12 @@ public class RYLA {
         return mRYLA;
     }
 
+    public RYLA setActivityContext(Context context) {
+        activityName = ((Activity) context).getLocalClassName();
+
+        return mRYLA;
+    }
+
     // 예외처리 핸들러 등록
     public void installExceptionHandler() {
         Thread.UncaughtExceptionHandler currentHandler = Thread.getDefaultUncaughtExceptionHandler();
@@ -75,18 +88,24 @@ public class RYLA {
 
     // Res 덤프 시작
     public void startResDump() {
+        Log.d("RYLA", "startResDump()");
         // Instrumentation 실행
         // Instrumentation 에서 CPU, Memory, Battery, 화면 클릭 가져옴
         RylaInstrumentation.getInstance().excute();
     }
 
     // Thread Stack 가져옴
-    public void getThreadTracing() {
+    public List<String> getThreadTracing() {
+        List<String> stackTraceLines = new ArrayList<>();
+
         Thread t = Looper.getMainLooper().getThread();
         StackTraceElement[] stackTraceList = t.getStackTrace();
         for(StackTraceElement stackTrace : stackTraceList) {
             Log.d("STACK TRACE", stackTrace.toString());
+            stackTraceLines.add(stackTrace.toString());
         }
+
+        return stackTraceLines;
 
         // 현재 쓰레드 스택트레이스
         /*************************
@@ -114,14 +133,28 @@ public class RYLA {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            Log.d("Lifecycle", "CREATED");
+            // 호출 시간 dump
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.CREATED,
+                            System.currentTimeMillis())
+            );
+
             activityList.add(activity);
             Log.d("ACTIVITIES", "Add : "+activity.getClass().getSimpleName());
         }
 
         @Override
         public void onActivityStarted(Activity activity) {
-            Log.d("Activity Life", "Started");
+            Log.d("Lifecycle", "Started");
             RYLA.getInstance().getThreadTracing();
+
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.STARTED,
+                            System.currentTimeMillis())
+            );
 
             // 백그라운드에서 포그라운드로 넘어온 경우
             if (isAppForeground() && !RylaInstrumentation.getInstance().isResThreadAlive()) {
@@ -132,12 +165,22 @@ public class RYLA {
 
         @Override
         public void onActivityResumed(Activity activity) {
-            Log.d("Activity Life", "Resumed");
+            Log.d("Lifecycle", "Resumed");
+            RYLA.getInstance().endRender();
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.RESUMED,
+                            System.currentTimeMillis())
+            );
         }
 
         @Override
         public void onActivityPaused(Activity activity) {
-
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.PAUSED,
+                            System.currentTimeMillis())
+            );
             // 포그라운드에서 백그라운드로 넘어가는 경우
             // TODO 이게 호출되는 시점은 항상 포그라운드 이기 때문에 소용 없음, 루프에서 체크
             if (!isAppForeground() && RylaInstrumentation.getInstance().isResThreadAlive()) {
@@ -148,7 +191,11 @@ public class RYLA {
 
         @Override
         public void onActivityStopped(Activity activity) {
-
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.STOPPED,
+                            System.currentTimeMillis())
+            );
         }
 
         @Override
@@ -158,6 +205,12 @@ public class RYLA {
 
         @Override
         public void onActivityDestroyed(Activity activity) {
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activity.getClass().getSimpleName(),
+                            ActivityRenderData.DESTROYED,
+                            System.currentTimeMillis())
+            );
+
             activityList.remove(activity);
             Log.d("ACTIVITIES", "Delete : "+activity.getClass().getSimpleName());
 
@@ -165,7 +218,7 @@ public class RYLA {
                 // 액티비티 스택이 0 이면 실행중인 화면이 없으므로 자원 수집 멈춤
                 // TODO 이시점에도 해당 Process 는 남아있음, Process 종료시점에 맞추어 Destroy 시켜야함
                 RylaInstrumentation.getInstance().setResThreadAlive(false);
-            } 
+            }
         }
     };
 
@@ -198,5 +251,19 @@ public class RYLA {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void startRender() {
+        Log.d("ASM TEST", "TEST!!!!!!!!");
+
+        startTime = System.currentTimeMillis();
+        Log.d("START Activity Time", "Name: "+activityName + ", Time: "+startTime);
+    }
+
+    public void endRender() {
+        endTime = System.currentTimeMillis();
+        Log.d("END Activity Time", "Name: "+activityName + ", Time: "+endTime);
+
+        // TODO Save Render time info
     }
 }

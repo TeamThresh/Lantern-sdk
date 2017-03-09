@@ -9,8 +9,6 @@ import android.util.Log;
 
 public class DeviceInfo {
     private static final String TAG = "DeviceInfo";
-    public DeviceInfo() {
-    }
 
     public static void sendDeviceInfo() {
         // TODO server connect
