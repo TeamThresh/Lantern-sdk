@@ -88,6 +88,12 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
     }
 
     @Override
+    protected void onPreExecute(){
+        Log.d(TAG, "onPreExecute");
+        DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+    }
+
+    @Override
     protected void onPostExecute(String result){
         Log.d(TAG, "onPostExecute");
         DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
