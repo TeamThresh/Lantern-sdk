@@ -25,6 +25,10 @@ import javax.net.ssl.SSLSocket;
 
 public class RYLA {
     private static Application mApplication;
+    private static String activityName;
+    private static long startTime;
+    private static long endTime;
+
 
     RylaInstrumentation rylaInstrumentation;
 
@@ -64,6 +68,12 @@ public class RYLA {
 
         // Activity List 를 가져오기위해 Callback에 등록
         mApplication.registerActivityLifecycleCallbacks(alcb);
+
+        return mRYLA;
+    }
+
+    public RYLA setActivityContext(Context context) {
+        activityName = ((Activity) context).getLocalClassName();
 
         return mRYLA;
     }
@@ -156,6 +166,7 @@ public class RYLA {
         @Override
         public void onActivityResumed(Activity activity) {
             Log.d("Lifecycle", "Resumed");
+            RYLA.getInstance().endRender();
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.RESUMED,
@@ -240,5 +251,19 @@ public class RYLA {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void startRender() {
+        Log.d("ASM TEST", "TEST!!!!!!!!");
+
+        startTime = System.currentTimeMillis();
+        Log.d("START Activity Time", "Name: "+activityName + ", Time: "+startTime);
+    }
+
+    public void endRender() {
+        endTime = System.currentTimeMillis();
+        Log.d("END Activity Time", "Name: "+activityName + ", Time: "+endTime);
+
+        // TODO Save Render time info
     }
 }
