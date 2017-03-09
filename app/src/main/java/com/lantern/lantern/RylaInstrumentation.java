@@ -172,7 +172,7 @@ public class RylaInstrumentation extends Instrumentation {
                                 vmstatInfo.toList(),
                                 memoryInfo.toList(),
                                 activityStackList,
-                                networkInfo.toList(),
+                                networkInfo,
                                 stackTraceInfo
                         )
                 );

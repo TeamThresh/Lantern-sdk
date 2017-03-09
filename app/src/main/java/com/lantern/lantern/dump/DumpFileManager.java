@@ -71,7 +71,8 @@ public class DumpFileManager {
             deviceInfo.put("app", getAppVersion());
             deviceInfo.put("device", Build.DEVICE);
             deviceInfo.put("brand", Build.BRAND);
-            deviceInfo.put("UUID", getDevicesUUID());
+            // TODO 권한이 필요하므로 삭제
+            //deviceInfo.put("UUID", getDevicesUUID());
 
             dumpData.put("device_info", deviceInfo);
             dumpData.put("data", dumpContents);

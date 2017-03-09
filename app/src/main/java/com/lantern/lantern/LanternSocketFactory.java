@@ -13,7 +13,7 @@ import java.util.List;
 
 public class LanternSocketFactory implements SocketImplFactory
 {
-    private List<SocketImpl> _openSockets;
+    private List<LanternSocketImpl> _openSockets;
 
     public LanternSocketFactory() {
         _openSockets = new LinkedList<>();
@@ -23,7 +23,9 @@ public class LanternSocketFactory implements SocketImplFactory
     public SocketImpl createSocketImpl() {
 
         Log.d("Socket Factory", "create");
-        return new LanternSocketImpl();
+        LanternSocketImpl socket = new LanternSocketImpl();
+        _openSockets.add(socket);
+        return socket;
         /*try {
             Constructor cons = null;
             cons = Class.forName("java.net.PlainSocketImpl").getDeclaredConstructor();
@@ -45,9 +47,9 @@ public class LanternSocketFactory implements SocketImplFactory
         }
         return null;*/
     }
-/*
+
     public void closeAll() {
-        for (SocketImpl socket : _openSockets) {
+        for (LanternSocketImpl socket : _openSockets) {
             try {
                 socket.close();
             } catch (Exception e) {
@@ -55,7 +57,7 @@ public class LanternSocketFactory implements SocketImplFactory
             }
         }
     }
-
+/*
     public static LanternSocketFactory register()
     {
         LanternSocketFactory fact =  new LanternSocketFactory();

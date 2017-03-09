@@ -172,6 +172,8 @@ public class LanternSocketImpl extends SocketImpl {
     }
 
     protected void close() throws IOException {
+        Log.d("Socket connection time", (System.currentTimeMillis() - this.startTime) + "");
+
         try {
             this.delegator.invoke(new Object[0]);
         } catch (Exception var4) {
