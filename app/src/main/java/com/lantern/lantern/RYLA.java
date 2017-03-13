@@ -13,7 +13,6 @@ import com.lantern.lantern.dump.DumpFileManager;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +24,9 @@ import javax.net.ssl.SSLSocket;
 
 public class RYLA {
     private static Application mApplication;
+    private static String activityName;
+    private static long startTime;
+    private static long endTime;
 
     RylaInstrumentation rylaInstrumentation;
 
@@ -64,6 +66,18 @@ public class RYLA {
 
         // Activity List 를 가져오기위해 Callback에 등록
         mApplication.registerActivityLifecycleCallbacks(alcb);
+
+        // Network 요청 정보를 가져오기위해 Factory에 등록
+        startNetworkTracing();
+
+        // 덤프 파일 초기화
+        DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+
+        return mRYLA;
+    }
+
+    public RYLA setActivityContext(Context context) {
+        activityName = ((Activity) context).getLocalClassName();
 
         return mRYLA;
     }
@@ -156,6 +170,7 @@ public class RYLA {
         @Override
         public void onActivityResumed(Activity activity) {
             Log.d("Lifecycle", "Resumed");
+            RYLA.getInstance().endRender();
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.RESUMED,
@@ -231,7 +246,8 @@ public class RYLA {
 
 
     public void startNetworkTracing() {
-        URL.setURLStreamHandlerFactory(new LanternURLStreamHandlerFactory());
+        //URL.setURLStreamHandlerFactory(new LanternURLStreamHandlerFactory());
+
         try {
             // TODO 응답 시간 가져올것 (connect ~ close 까지)
             LanternSocketFactory sf = new LanternSocketFactory();
@@ -240,5 +256,18 @@ public class RYLA {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void startRender() {
+        Log.d("ASM TEST", "TEST!!!!!!!!");
+
+        startTime = System.currentTimeMillis();
+        Log.d("START Activity Time", "Name: "+activityName + ", Time: "+startTime);
+    }
+
+    public void endRender() {
+        endTime = System.currentTimeMillis();
+        Log.d("END Activity Time", "Name: "+activityName + ", Time: "+endTime);
+        // TODO Save Render time info
     }
 }

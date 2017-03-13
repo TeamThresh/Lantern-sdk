@@ -2,6 +2,9 @@ package com.lantern.lantern;
 
 import android.util.Log;
 
+import com.lantern.lantern.network.SocketMonitoringInputStream;
+import com.lantern.lantern.network.SocketMonitoringOutputStream;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -172,6 +175,8 @@ public class LanternSocketImpl extends SocketImpl {
     }
 
     protected void close() throws IOException {
+        Log.d("Socket connection time", (System.currentTimeMillis() - this.startTime) + "");
+
         try {
             this.delegator.invoke(new Object[0]);
         } catch (Exception var4) {
@@ -267,7 +272,7 @@ public class LanternSocketImpl extends SocketImpl {
                 throw (IOException)var3;
             }
         }
-        return stream;
+        return new SocketMonitoringInputStream(stream);
     }
 
     public Object getOption(int optID) throws SocketException {
@@ -291,7 +296,7 @@ public class LanternSocketImpl extends SocketImpl {
 
             var3.printStackTrace();
         }
-        return out;
+        return new SocketMonitoringOutputStream(out);
     }
 
     protected void listen(int backlog) throws IOException {

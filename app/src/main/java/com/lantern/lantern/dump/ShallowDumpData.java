@@ -1,5 +1,7 @@
 package com.lantern.lantern.dump;
 
+import com.lantern.lantern.Resource.NetworkResource;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,14 +20,14 @@ public class ShallowDumpData implements DumpData {
     private List<String> vmstatInfo;
     private List<Long> memoryInfo;
     private List<String> activityStackInfo;
-    private List<String> networkUsageInfo;
+    private NetworkResource networkUsageInfo;
     private List<String> stackTraceinfo;
 
 
     public ShallowDumpData(Long startTime, Long endTime, List<Long> cpuInfo,
                            List<String> cpuAppInfo, List<String> vmstatInfo,
                            List<Long> memoryInfo, List<String> activityStackInfo,
-                           List<String> networkUsageInfo, List<String> stackTraceinfo) {
+                           NetworkResource networkUsageInfo, List<String> stackTraceinfo) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.cpuInfo = cpuInfo;
@@ -94,11 +96,11 @@ public class ShallowDumpData implements DumpData {
         this.activityStackInfo = activityStackInfo;
     }
 
-    public List<String> getNetworkUsageInfo() {
+    public NetworkResource getNetworkUsageInfo() {
         return networkUsageInfo;
     }
 
-    public void setNetworkUsageInfo(List<String> networkUsageInfo) {
+    public void setNetworkUsageInfo(NetworkResource networkUsageInfo) {
         this.networkUsageInfo = networkUsageInfo;
     }
 
@@ -142,7 +144,6 @@ public class ShallowDumpData implements DumpData {
         JSONObject osData = new JSONObject();
         JSONObject cpuData = new JSONObject();
         JSONObject vmstatData = new JSONObject();
-        JSONObject networkData = new JSONObject();
 
         try {
             //cpu
@@ -171,15 +172,7 @@ public class ShallowDumpData implements DumpData {
             osData.put("battery", 10);
 
             //network_usage
-            String[] labelNetwork = {"type", "rx", "tx"};
-            for(int i=0;i<labelNetwork.length;i++) {
-                if(i==0) {
-                    networkData.put(labelNetwork[i], getNetworkUsageInfo().get(i));
-                } else {
-                    networkData.put(labelNetwork[i], Long.parseLong(getNetworkUsageInfo().get(i)));
-                }
-            }
-            osData.put("network_usage", networkData);
+            osData.put("network_usage", getNetworkUsageInfo().toJSON());
         } catch (JSONException e) {
             e.printStackTrace();
         }

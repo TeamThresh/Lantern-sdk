@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -27,6 +28,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
     private final String TAG = "DataUploadTask";
     private Context mContext;
     private final static String SERVER_URL = "http://61.43.139.16:3000/api/upload";
+    private HttpURLConnection conn;
 
     public DataUploadTask(Context context) {
         this.mContext = context;
@@ -39,28 +41,36 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
         // 연결
         try {
             URL url = new URL(SERVER_URL);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
             conn.setRequestMethod("POST");
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
             conn.setRequestProperty("Cache-Control", "no-cache");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Accept", "application/json");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
 
             // 데이터
             JSONObject jsonObject = new JSONObject(DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpFile());
             String param = jsonObject.toString();
-
+            Log.d("CLASS NAME", "" +conn.getDoInput() +"/"+conn.getDoOutput());
+            Log.d("CLASS NAME", conn.getClass().toString());
             // 전송
             OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream());
             osw.write(param);
             osw.flush();
 
             // 응답
+            InputStream inputStream;
+
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                inputStream = conn.getErrorStream();
+            } else {
+                inputStream = conn.getInputStream();
+            }
             BufferedReader br = null;
-            br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+            br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
             String line = null;
             while ((line = br.readLine()) != null) {
@@ -69,6 +79,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
             // 닫기
             osw.close();
+            inputStream.close();
             br.close();
 
             return null;
@@ -90,6 +101,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(String result){
         Log.d(TAG, "onPostExecute");
+        conn.disconnect();
         DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
     }
 }
