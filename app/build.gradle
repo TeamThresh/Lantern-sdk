@@ -1,4 +1,20 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+publish {
+    userOrg = 'lantern'
+    groupId = 'com.lantern.lantern'
+    artifactId = 'lantern-alpha'
+    publishVersion = '0.1.1'
+    desc = 'lantern mobile apm'
+}
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.3.4'
+    }
+}
 
 android {
     compileSdkVersion 25

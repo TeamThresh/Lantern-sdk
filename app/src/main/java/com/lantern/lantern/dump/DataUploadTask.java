@@ -41,12 +41,13 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
         // 연결
         try {
-            URL url = new URL(SERVER_URL);
+            String server_url = mContext.getSharedPreferences("pref", Context.MODE_PRIVATE).getString("server_url", SERVER_URL);
+            URL url = new URL(server_url);
             conn = (HttpURLConnection) url.openConnection();
             conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
-            conn.setConnectTimeout(10000);
+            conn.setConnectTimeout(1000*60*60);
             conn.setReadTimeout(10000);
             conn.setRequestProperty("Cache-Control", "no-cache");
             conn.setRequestProperty("Content-Type", "application/json");
