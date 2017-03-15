@@ -228,14 +228,14 @@ public class RYLA {
     public void startNetworkTracing() {
         //URL.setURLStreamHandlerFactory(new LanternURLStreamHandlerFactory());
 
-        try {
-            // TODO 응답 시간 가져올것 (connect ~ close 까지)
-            LanternSocketFactory sf = new LanternSocketFactory();
-            Socket.setSocketImplFactory(sf);
-            SSLSocket.setSocketImplFactory(sf);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            // TODO 응답 시간 가져올것 (connect ~ close 까지)
+//            LanternSocketFactory sf = new LanternSocketFactory();
+//            Socket.setSocketImplFactory(sf);
+//            SSLSocket.setSocketImplFactory(sf);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void startRender() {

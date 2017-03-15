@@ -4,7 +4,7 @@ publish {
     userOrg = 'lantern'
     groupId = 'com.lantern.lantern'
     artifactId = 'lantern-alpha'
-    publishVersion = '0.1.1'
+    publishVersion = '0.1.3'
     desc = 'lantern mobile apm'
 }
 buildscript {

@@ -137,7 +137,8 @@ public class DumpFileManager {
 
             while(inputStr != null) {
                 //buffer.append(inputStr + "\n");
-                builder.append(inputStr + "\n");
+                //builder.append(inputStr + "\n");
+                builder.append(inputStr);
                 inputStr = reader.readLine();
             }
         } catch (IOException e) {
