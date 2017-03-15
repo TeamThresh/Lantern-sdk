@@ -149,7 +149,7 @@ public class DumpFileManager {
     }
 
     //dump data 파일에 저장하기
-    public void saveDumpData(DumpData dumpData) {
+    public synchronized void saveDumpData(DumpData dumpData) {
         JSONObject resDumpJson = dumpData.getDumpData();
         JSONObject preSavedDumpData;
 
