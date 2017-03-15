@@ -15,11 +15,13 @@ import com.lantern.lantern.Resource.CPUResource;
 import com.lantern.lantern.Resource.MemoryResource;
 import com.lantern.lantern.Resource.NetworkResource;
 import com.lantern.lantern.Resource.StatResource;
+import com.lantern.lantern.Resource.ThreadTrace;
 import com.lantern.lantern.dump.DataUploadTask;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.ShallowDumpData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -123,14 +125,20 @@ public class RylaInstrumentation extends Instrumentation {
                 MemoryResource memoryInfo;
                 StatResource vmstatInfo;
                 List<String> activityStackList = new ArrayList<>();
-                List<String> stackTraceInfo;
+                HashMap<String, List<StackTraceElement>> stackTraceInfo;
+
+                // 각각 걸리는 시간 계산
+                long tempTime = 0;
+                HashMap<String, Long> taskTime = new HashMap<>();
 
                 // 시작시간
                 dumpStartTime = System.currentTimeMillis();
                 Log.d("DUMP TIME", "====== "+ dumpStartTime +" =======");
 
                 // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
-                stackTraceInfo = RYLA.getInstance().getThreadTracing();
+                tempTime = System.currentTimeMillis();
+                stackTraceInfo = new ThreadTrace().getAllThreadTracing();
+                taskTime.put("thread_dump_time", System.currentTimeMillis() - tempTime);
 
                 for (Activity activity : RYLA.getInstance().getActivityList()) {
                     Log.d("ACTIVITIES", activity.getClass().getSimpleName());
@@ -141,15 +149,23 @@ public class RylaInstrumentation extends Instrumentation {
                 networkInfo = new NetworkResource();
 
                 // MEMORY INFO
+                tempTime = System.currentTimeMillis();
                 memoryInfo = new MemoryResource();
+                taskTime.put("memory_time", System.currentTimeMillis() - tempTime);
 
                 // CPU INFO
                 // top 방식 아닌 직접 가져오는 방식 사용
+                tempTime = System.currentTimeMillis();
                 cpuInfo = new CPUResource();
+                taskTime.put("proc_stat_time", System.currentTimeMillis() - tempTime);
+                tempTime = System.currentTimeMillis();
                 cpuAppInfo = new CPUAppResource();
+                taskTime.put("proc_pid_time", System.currentTimeMillis() - tempTime);
 
                 // vmstat INFO
+                tempTime = System.currentTimeMillis();
                 vmstatInfo = new StatResource();
+                taskTime.put("vmstat_time", System.currentTimeMillis() - tempTime);
 
                 // Logging
                 Log.d("NETWORK INFO", networkInfo.toString());
@@ -173,7 +189,8 @@ public class RylaInstrumentation extends Instrumentation {
                                 memoryInfo.toList(),
                                 activityStackList,
                                 networkInfo,
-                                stackTraceInfo
+                                stackTraceInfo,
+                                taskTime
                         )
                 );
             }

@@ -6,7 +6,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by yky on 2017. 2. 13..
@@ -21,13 +23,14 @@ public class ShallowDumpData implements DumpData {
     private List<Long> memoryInfo;
     private List<String> activityStackInfo;
     private NetworkResource networkUsageInfo;
-    private List<String> stackTraceinfo;
-
+    private HashMap<String, List<StackTraceElement>> stackTraceinfo;
+    private HashMap<String, Long> taskTime;
 
     public ShallowDumpData(Long startTime, Long endTime, List<Long> cpuInfo,
                            List<String> cpuAppInfo, List<String> vmstatInfo,
                            List<Long> memoryInfo, List<String> activityStackInfo,
-                           NetworkResource networkUsageInfo, List<String> stackTraceinfo) {
+                           NetworkResource networkUsageInfo, HashMap<String, List<StackTraceElement>> stackTraceinfo,
+                           HashMap<String, Long> taskTime) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.cpuInfo = cpuInfo;
@@ -37,6 +40,7 @@ public class ShallowDumpData implements DumpData {
         this.activityStackInfo = activityStackInfo;
         this.networkUsageInfo = networkUsageInfo;
         this.stackTraceinfo = stackTraceinfo;
+        this.taskTime = taskTime;
     }
 
 
@@ -104,11 +108,11 @@ public class ShallowDumpData implements DumpData {
         this.networkUsageInfo = networkUsageInfo;
     }
 
-    public List<String> getStackTraceinfo() {
+    public HashMap<String, List<StackTraceElement>> getStackTraceinfo() {
         return stackTraceinfo;
     }
 
-    public void setStackTraceinfo(List<String> stackTraceinfo) {
+    public void setStackTraceinfo(HashMap<String, List<StackTraceElement>> stackTraceinfo) {
         this.stackTraceinfo = stackTraceinfo;
     }
 
@@ -117,6 +121,7 @@ public class ShallowDumpData implements DumpData {
     public JSONObject getDumpData() {
         JSONObject resData = new JSONObject();
         JSONObject durationData = new JSONObject();
+        JSONObject timeData = new JSONObject();
 
         try {
             //type
@@ -126,6 +131,12 @@ public class ShallowDumpData implements DumpData {
             durationData.put("start", getStartTime());
             durationData.put("end", getEndTime());
             resData.put("duration_time", durationData);
+
+            // task time
+            for (String key : taskTime.keySet()) {
+                timeData.put(key, taskTime.get(key));
+            }
+            resData.put("task_time", timeData);
 
             // parse os data
             resData.put("os", getParsedOsData());
@@ -185,17 +196,14 @@ public class ShallowDumpData implements DumpData {
         JSONObject cpuAppData = new JSONObject();
         JSONObject memoryData = new JSONObject();
         JSONArray activityData = new JSONArray();
-        JSONArray stackTraceData = new JSONArray();
+        JSONArray threadList = new JSONArray();
 
         try {
             // cpu app
             String[] labelCpuApp = {"state","ppid","pgrp","session","tty_nr","tpgid","flags","minflt","cminflt" +
                     "majflt","cmajflt","utime","stime","cutime","cstime","priority","nice","num_threads" +
                     "itrealvalue","starttime","vsize","rss_","rsslim","startcode","endcode","startstack" +
-                    "kstkesp","kstkeip","signal","blocked","sigignore","sigcatch","wchan","nswap","cnswap" +
-                    "exit_signal","processor","rt_priority","policy","dly_io_tic","guest_time" +
-                    "cguest_time","start_data","enddata","str_brk","arg_str","arg_end","env_str" +
-                    "env_end","ext_cod"};
+                    "kstkesp","kstkeip","signal","blocked","sigignore","sigcatch","wchan","nswap"};
             for(int i=0;i<labelCpuApp.length;i++) {
                 cpuAppData.put(labelCpuApp[i], getCpuAppInfo().get(i));
             }
@@ -217,10 +225,18 @@ public class ShallowDumpData implements DumpData {
 
 
             //thread_trace
-            for(int i=0;i<getStackTraceinfo().size();i++) {
-                stackTraceData.put(getStackTraceinfo().get(i));
+            Set<String> keySet = getStackTraceinfo().keySet();
+            for(String key : keySet) {
+                JSONObject tempObj = new JSONObject();
+                JSONArray stackTraceData = new JSONArray();
+                tempObj.put("trace_name", key);
+                for(StackTraceElement element : getStackTraceinfo().get(key)) {
+                    stackTraceData.put(element);
+                }
+                tempObj.put("trace_list", stackTraceData);
+                threadList.put(tempObj);
             }
-            appData.put("thread_trace", stackTraceData);
+            appData.put("thread_trace", threadList);
         } catch (JSONException e) {
             e.printStackTrace();
         }
