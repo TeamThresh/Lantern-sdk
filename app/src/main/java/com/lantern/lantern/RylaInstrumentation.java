@@ -19,6 +19,7 @@ import com.lantern.lantern.Resource.ThreadTrace;
 import com.lantern.lantern.dump.DataUploadTask;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.ShallowDumpData;
+import com.lantern.lantern.util.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ public class RylaInstrumentation extends Instrumentation {
 
     public RylaInstrumentation() {
         SharedPreferences pref = RYLA.getInstance().getContext().getSharedPreferences("pref", MODE_PRIVATE);
-        dumpTerm = pref.getInt("dump_term", 10000);
+        dumpTerm = pref.getInt("dump_term", 1000);
     }
 
     // Instrumentation 초기화 실행
@@ -55,7 +56,7 @@ public class RylaInstrumentation extends Instrumentation {
     private boolean isResThreadAlive = false;
 
     public static RylaInstrumentation getInstance() {
-        Log.d("RylaInstrumentation", "getInstance");
+        Logger.d("RylaInstrumentation", "getInstance");
         if (rylaInstrumentation == null) {
             rylaInstrumentation = new RylaInstrumentation();
         }
@@ -63,7 +64,7 @@ public class RylaInstrumentation extends Instrumentation {
     }
 
     public void excute() {
-        Log.d("RylaInstrumentation", "excute");
+        Logger.d("RylaInstrumentation", "excute");
         isResThreadAlive = true;
 
         new DataUploadTask(RYLA.getInstance().getContext()).execute();
@@ -104,7 +105,7 @@ public class RylaInstrumentation extends Instrumentation {
     public void onDestroy() {
         super.onDestroy();
 
-        Log.d("eunchan", "MyInstrumentation::onDestory() : I'm being destroeyd!!! O.M.G.");
+        Logger.d("eunchan", "MyInstrumentation::onDestory() : I'm being destroeyd!!! O.M.G.");
     }
 
     @Override
@@ -133,7 +134,7 @@ public class RylaInstrumentation extends Instrumentation {
 
                 // 시작시간
                 dumpStartTime = System.currentTimeMillis();
-                Log.d("DUMP TIME", "====== "+ dumpStartTime +" =======");
+                Logger.d("DUMP TIME", "====== "+ dumpStartTime +" =======");
 
                 // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
                 tempTime = System.currentTimeMillis();
@@ -141,7 +142,7 @@ public class RylaInstrumentation extends Instrumentation {
                 taskTime.put("thread_dump_time", System.currentTimeMillis() - tempTime);
 
                 for (Activity activity : RYLA.getInstance().getActivityList()) {
-                    Log.d("ACTIVITIES", activity.getClass().getSimpleName());
+                    Logger.d("ACTIVITIES", activity.getClass().getSimpleName());
                     activityStackList.add(activity.getClass().getSimpleName());
                 }
 
@@ -168,15 +169,15 @@ public class RylaInstrumentation extends Instrumentation {
                 taskTime.put("vmstat_time", System.currentTimeMillis() - tempTime);
 
                 // Logging
-                Log.d("NETWORK INFO", networkInfo.toString());
+                Logger.d("NETWORK INFO", networkInfo.toString());
                 memoryInfo.printMemoryInfo();
-                Log.d("CPU INFO", cpuInfo.toString());
-                Log.d("CPU APP INFO", cpuAppInfo.toString());
-                Log.d("VMSTAT INFO", vmstatInfo.toString());
+                Logger.d("CPU INFO", cpuInfo.toString());
+                Logger.d("CPU APP INFO", cpuAppInfo.toString());
+                Logger.d("VMSTAT INFO", vmstatInfo.toString());
 
                 // 종료시간
                 dumpEndTime = System.currentTimeMillis();
-                Log.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
+                Logger.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
 
                 //save res dump file
                 DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
@@ -203,40 +204,18 @@ public class RylaInstrumentation extends Instrumentation {
     }
 
     public void startTouchTracing(Context mApplication) {
-        // 이방법으로 하면 ACTION 의 이름을 가져올수 없음
 
-//        mWindowManager = (WindowManager) mApplication.getSystemService(WINDOW_SERVICE);
-//        touchLayout = new LinearLayout(mApplication);
-//
-//        WindowManager.LayoutParams params = new WindowManager.LayoutParams(1, WindowManager.LayoutParams.MATCH_PARENT);
-//        touchLayout.setLayoutParams(params);
-//        touchLayout.setOnTouchListener(touchListener);
-//
-//
-//        WindowManager.LayoutParams params2 = new WindowManager.LayoutParams(
-//                1,  // width
-//                1,  // height
-//                WindowManager.LayoutParams.TYPE_PHONE,
-//                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-//                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-//                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-//                PixelFormat.TRANSPARENT
-//        );
-//        params.gravity = Gravity.LEFT | Gravity.TOP;
-//        mWindowManager.addView(touchLayout, params2);
     }
 
     public void stopTouchTracing() {
-//        if(mWindowManager != null) {
-//            if(touchLayout != null) mWindowManager.removeView(touchLayout);
-//        }
+
     }
 
     private View.OnTouchListener touchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            Log.d("TOUCH INFO", event.toString());
-            Log.d("TOUCH INFO", event.getX()+"("+event.getRawX()+")" +"/"+ event.getY()+"("+event.getRawY()+")");
+            Logger.d("TOUCH INFO", event.toString());
+            Logger.d("TOUCH INFO", event.getX()+"("+event.getRawX()+")" +"/"+ event.getY()+"("+event.getRawY()+")");
             return false;
         }
     };

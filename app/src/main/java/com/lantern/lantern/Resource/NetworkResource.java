@@ -15,25 +15,6 @@ public class NetworkResource implements Resource {
 
     public NetworkResource() {
         // TODO 권한이 필요하므로 삭제
-        /*ConnectivityManager connManager;
-        connManager = (ConnectivityManager) RYLA.getInstance().getContext().getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo mNetwork = connManager.getActiveNetworkInfo();
-
-        Log.d("NETWORK NAME", mNetwork.getTypeName());
-        rxtxInfo.add(mNetwork.getTypeName());
-
-        long mRX = TrafficStats.getMobileRxBytes();
-        long mTX = TrafficStats.getMobileTxBytes();
-
-        if (mRX == TrafficStats.UNSUPPORTED || mTX == TrafficStats.UNSUPPORTED) {
-            Log.d("NETWORK USAGE", "지원안함");
-            rxtxInfo.add("-1");
-            rxtxInfo.add("-1");
-        } else {
-            Log.d("NETWORK USAGE", "Rx: " + mRX + ", Tx: " + mTX);
-            rxtxInfo.add(Long.toString(mRX));
-            rxtxInfo.add(Long.toString(mTX));
-        }*/
     }
 
     @Override

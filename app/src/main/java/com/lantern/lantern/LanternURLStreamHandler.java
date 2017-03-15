@@ -2,6 +2,8 @@ package com.lantern.lantern;
 
 import android.util.Log;
 
+import com.lantern.lantern.util.Logger;
+
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
@@ -19,7 +21,7 @@ public class LanternURLStreamHandler extends URLStreamHandler {
     }
 
     protected URLConnection openConnection(URL url) throws IOException {
-        Log.d("URL INFO", url.toString());
+        Logger.d("URL INFO", url.toString());
 
         return new LanternHttpURLConnection(url);
     }
@@ -29,7 +31,7 @@ public class LanternURLStreamHandler extends URLStreamHandler {
             return this.openConnection(url);
         } else {
 
-            Log.d("URL INFO", url.toString());
+            Logger.d("URL INFO", url.toString());
             return new LanternHttpURLConnection(url, proxy);
         }
     }

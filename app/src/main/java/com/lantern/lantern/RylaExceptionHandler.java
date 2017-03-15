@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.lantern.lantern.dump.CrashDumpData;
 import com.lantern.lantern.dump.DumpFileManager;
+import com.lantern.lantern.util.Logger;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -30,7 +31,7 @@ public class RylaExceptionHandler implements Thread.UncaughtExceptionHandler {
             ex.printStackTrace();
         }
 
-        Log.d("CRASH", stacktrace.toString());
+        Logger.d("CRASH", stacktrace.toString());
         DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                 new CrashDumpData(stacktrace.toString())
         );

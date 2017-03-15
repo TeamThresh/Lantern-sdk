@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.lantern.lantern.RYLA;
+import com.lantern.lantern.util.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +37,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected String doInBackground(Void... voids) {
-        Log.d(TAG, "doInBackground");
+        Logger.d(TAG, "doInBackground");
 
         // 연결
         try {
@@ -54,8 +55,8 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
             // 데이터
             JSONObject jsonObject = new JSONObject(DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpFile());
             String param = jsonObject.toString();
-            Log.d("CLASS NAME", "" +conn.getDoInput() +"/"+conn.getDoOutput());
-            Log.d("CLASS NAME", conn.getClass().toString());
+            Logger.d("CLASS NAME", "" +conn.getDoInput() +"/"+conn.getDoOutput());
+            Logger.d("CLASS NAME", conn.getClass().toString());
             // 전송
             OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream());
             osw.write(param);
@@ -74,7 +75,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
             String line = null;
             while ((line = br.readLine()) != null) {
-                Log.d(TAG, "response : " + line);
+                Logger.d(TAG, "response : " + line);
             }
 
             // 닫기
@@ -100,7 +101,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String result){
-        Log.d(TAG, "onPostExecute");
+        Logger.d(TAG, "onPostExecute");
         conn.disconnect();
         DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
     }

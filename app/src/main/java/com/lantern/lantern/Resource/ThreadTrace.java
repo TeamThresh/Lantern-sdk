@@ -3,6 +3,8 @@ package com.lantern.lantern.Resource;
 import android.os.Looper;
 import android.util.Log;
 
+import com.lantern.lantern.util.Logger;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +23,7 @@ public class ThreadTrace {
         Thread t = Looper.getMainLooper().getThread();
         StackTraceElement[] stackTraceList = t.getStackTrace();
         for(StackTraceElement stackTrace : stackTraceList) {
-            Log.d("STACK TRACE", stackTrace.toString());
+            Logger.d("STACK TRACE", stackTrace.toString());
             stackTraceLines.add(stackTrace.toString());
         }
 

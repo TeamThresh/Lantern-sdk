@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.lantern.lantern.dump.ActivityRenderData;
 import com.lantern.lantern.dump.DumpFileManager;
+import com.lantern.lantern.util.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -55,7 +56,7 @@ public class RYLA {
 
     // 실행전 Context 설정
     public RYLA setContext(Application application) {
-        Log.d("RYLA", "setContext 실행");
+        Logger.d("RYLA", "setContext 실행");
         mApplication = application;
 
         // 디바이스 정보
@@ -92,7 +93,7 @@ public class RYLA {
 
     // Res 덤프 시작
     public void startResDump() {
-        Log.d("RYLA", "startResDump()");
+        Logger.d("RYLA", "startResDump()");
         // Instrumentation 실행
         // Instrumentation 에서 CPU, Memory, Battery, 화면 클릭 가져옴
         RylaInstrumentation.getInstance().excute();
@@ -105,39 +106,18 @@ public class RYLA {
         Thread t = Looper.getMainLooper().getThread();
         StackTraceElement[] stackTraceList = t.getStackTrace();
         for(StackTraceElement stackTrace : stackTraceList) {
-            Log.d("STACK TRACE", stackTrace.toString());
+            Logger.d("STACK TRACE", stackTrace.toString());
             stackTraceLines.add(stackTrace.toString());
         }
 
         return stackTraceLines;
-
-        // 현재 쓰레드 스택트레이스
-        /*************************
-         Thread ct = Thread.currentThread();
-         StackTraceElement[] currentStackTraceList = ct.getStackTrace();
-         for(StackTraceElement stackTrace : currentStackTraceList) {
-         Log.d("STACK TRACE", stackTrace.toString());
-         }
-         */
-
-        // 전체 스택트레이스
-        /*************************
-         Map<Thread, StackTraceElement[]> temp = Thread.getAllStackTraces();
-         Set<Thread> tempKey = temp.keySet();
-         for (Thread th : tempKey) {
-         Log.i("KEY", th.getName());
-         for (StackTraceElement element : temp.get(th)) {
-         Log.i("ELEMENTS", element.toString());
-         }
-         }
-         */
     }
 
     private static Application.ActivityLifecycleCallbacks alcb = new Application.ActivityLifecycleCallbacks() {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-            Log.d("Lifecycle", "CREATED");
+            Logger.d("Lifecycle", "CREATED");
             // 호출 시간 dump
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
@@ -146,12 +126,12 @@ public class RYLA {
             );
 
             activityList.add(activity);
-            Log.d("ACTIVITIES", "Add : "+activity.getClass().getSimpleName());
+            Logger.d("ACTIVITIES", "Add : "+activity.getClass().getSimpleName());
         }
 
         @Override
         public void onActivityStarted(Activity activity) {
-            Log.d("Lifecycle", "Started");
+            Logger.d("Lifecycle", "Started");
             RYLA.getInstance().getThreadTracing();
 
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
@@ -169,7 +149,7 @@ public class RYLA {
 
         @Override
         public void onActivityResumed(Activity activity) {
-            Log.d("Lifecycle", "Resumed");
+            Logger.d("Lifecycle", "Resumed");
             RYLA.getInstance().endRender();
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
@@ -216,7 +196,7 @@ public class RYLA {
             );
 
             activityList.remove(activity);
-            Log.d("ACTIVITIES", "Delete : "+activity.getClass().getSimpleName());
+            Logger.d("ACTIVITIES", "Delete : "+activity.getClass().getSimpleName());
 
             if (activityList.size() == 0) {
                 // 액티비티 스택이 0 이면 실행중인 화면이 없으므로 자원 수집 멈춤
@@ -259,15 +239,15 @@ public class RYLA {
     }
 
     public void startRender() {
-        Log.d("ASM TEST", "TEST!!!!!!!!");
+        Logger.d("ASM TEST", "TEST!!!!!!!!");
 
         startTime = System.currentTimeMillis();
-        Log.d("START Activity Time", "Name: "+activityName + ", Time: "+startTime);
+        Logger.d("START Activity Time", "Name: "+activityName + ", Time: "+startTime);
     }
 
     public void endRender() {
         endTime = System.currentTimeMillis();
-        Log.d("END Activity Time", "Name: "+activityName + ", Time: "+endTime);
+        Logger.d("END Activity Time", "Name: "+activityName + ", Time: "+endTime);
         // TODO Save Render time info
     }
 }
