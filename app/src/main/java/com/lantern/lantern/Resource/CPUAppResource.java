@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.util.Log;
 
 import com.lantern.lantern.RYLA;
+import com.lantern.lantern.util.Logger;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -39,7 +40,7 @@ public class CPUAppResource implements Resource {
             runningAppProcess = rAppProcess.next();
             ProcessInfo processInfo = new ProcessInfo(runningAppProcess.processName, runningAppProcess.pid);
             taskProcessInfo.add(processInfo);
-            Log.d("TASK INFO", runningAppProcess.processName);
+            Logger.d("TASK INFO", runningAppProcess.processName);
         }
 
         try {

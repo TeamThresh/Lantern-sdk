@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.lantern.lantern.dump.DumpFileManager;
+import com.lantern.lantern.util.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -134,7 +135,7 @@ public class DataUploadManager {
             protected void onPostExecute(JSONObject result) {
                 try {
                     String rtnCode = result.get("message").toString();
-                    Log.d(TAG, "rtnCode : " + rtnCode);
+                    Logger.d(TAG, "rtnCode : " + rtnCode);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

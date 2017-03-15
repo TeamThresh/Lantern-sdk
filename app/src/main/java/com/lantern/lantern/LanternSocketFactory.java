@@ -2,6 +2,8 @@ package com.lantern.lantern;
 
 import android.util.Log;
 
+import com.lantern.lantern.util.Logger;
+
 import java.net.SocketImpl;
 import java.net.SocketImplFactory;
 import java.util.LinkedList;
@@ -22,7 +24,7 @@ public class LanternSocketFactory implements SocketImplFactory
     @Override
     public SocketImpl createSocketImpl() {
 
-        Log.d("Socket Factory", "create");
+        Logger.d("Socket Factory", "create");
         LanternSocketImpl socket = new LanternSocketImpl();
         _openSockets.add(socket);
         return socket;
@@ -31,7 +33,7 @@ public class LanternSocketFactory implements SocketImplFactory
             cons = Class.forName("java.net.PlainSocketImpl").getDeclaredConstructor();
             cons.setAccessible(true);
             SocketImpl socketImpl = (SocketImpl) cons.newInstance();
-            Log.d("SOCKET", socketImpl.toString());
+            Logger.d("SOCKET", socketImpl.toString());
             _openSockets.add(socketImpl);
             return socketImpl;
         } catch (NoSuchMethodException e) {

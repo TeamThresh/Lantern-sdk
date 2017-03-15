@@ -19,18 +19,18 @@ public class NetworkResource implements Resource {
         connManager = (ConnectivityManager) RYLA.getInstance().getContext().getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo mNetwork = connManager.getActiveNetworkInfo();
 
-        Log.d("NETWORK NAME", mNetwork.getTypeName());
+        Logger.d("NETWORK NAME", mNetwork.getTypeName());
         rxtxInfo.add(mNetwork.getTypeName());
 
         long mRX = TrafficStats.getMobileRxBytes();
         long mTX = TrafficStats.getMobileTxBytes();
 
         if (mRX == TrafficStats.UNSUPPORTED || mTX == TrafficStats.UNSUPPORTED) {
-            Log.d("NETWORK USAGE", "지원안함");
+            Logger.d("NETWORK USAGE", "지원안함");
             rxtxInfo.add("-1");
             rxtxInfo.add("-1");
         } else {
-            Log.d("NETWORK USAGE", "Rx: " + mRX + ", Tx: " + mTX);
+            Logger.d("NETWORK USAGE", "Rx: " + mRX + ", Tx: " + mTX);
             rxtxInfo.add(Long.toString(mRX));
             rxtxInfo.add(Long.toString(mTX));
         }*/
