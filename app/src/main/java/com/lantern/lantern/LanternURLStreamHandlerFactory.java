@@ -2,6 +2,8 @@ package com.lantern.lantern;
 
 import android.util.Log;
 
+import com.lantern.lantern.util.Logger;
+
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
@@ -15,8 +17,8 @@ public class LanternURLStreamHandlerFactory implements URLStreamHandlerFactory {
     }
 
     public URLStreamHandler createURLStreamHandler(String protocol) {
-        Log.d("Custom FACTORY", "실행은 됨?");
-        Log.d("Custom FACTORY", "protocol : "+protocol);
+        Logger.d("Custom FACTORY", "실행은 됨?");
+        Logger.d("Custom FACTORY", "protocol : "+protocol);
         if (!protocol.equals("http") && !protocol.equals("https")) return null;
         return new LanternURLStreamHandler(protocol);
     }

@@ -7,6 +7,8 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.lantern.lantern.util.Logger;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,7 +50,7 @@ public class DumpFileManager {
 
     //덤프 파일 생성하기 및 덤프 헤더 파일에 저장하기
     public void initDumpFile() {
-        Log.d(TAG,"initDumpFile");
+        Logger.d(TAG,"initDumpFile");
         //덤프 헤더 파일 작성
         dumpJson = getDumpHeader();
 
@@ -155,7 +157,7 @@ public class DumpFileManager {
             preSavedDumpData.getJSONArray("data").put(resDumpJson);
             saveDumpFile(preSavedDumpData.toString());
 
-            Log.d(TAG, new JSONObject(readDumpFile()).toString(2));
+            Logger.d(TAG, new JSONObject(readDumpFile()).toString(2));
         } catch (JSONException e) {
             e.printStackTrace();
         }
