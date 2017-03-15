@@ -111,27 +111,6 @@ public class RYLA {
         }
 
         return stackTraceLines;
-
-        // 현재 쓰레드 스택트레이스
-        /*************************
-         Thread ct = Thread.currentThread();
-         StackTraceElement[] currentStackTraceList = ct.getStackTrace();
-         for(StackTraceElement stackTrace : currentStackTraceList) {
-         Logger.d("STACK TRACE", stackTrace.toString());
-         }
-         */
-
-        // 전체 스택트레이스
-        /*************************
-         Map<Thread, StackTraceElement[]> temp = Thread.getAllStackTraces();
-         Set<Thread> tempKey = temp.keySet();
-         for (Thread th : tempKey) {
-         Log.i("KEY", th.getName());
-         for (StackTraceElement element : temp.get(th)) {
-         Log.i("ELEMENTS", element.toString());
-         }
-         }
-         */
     }
 
     private static Application.ActivityLifecycleCallbacks alcb = new Application.ActivityLifecycleCallbacks() {

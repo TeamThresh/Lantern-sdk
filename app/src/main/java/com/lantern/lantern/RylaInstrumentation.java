@@ -204,33 +204,11 @@ public class RylaInstrumentation extends Instrumentation {
     }
 
     public void startTouchTracing(Context mApplication) {
-        // 이방법으로 하면 ACTION 의 이름을 가져올수 없음
 
-//        mWindowManager = (WindowManager) mApplication.getSystemService(WINDOW_SERVICE);
-//        touchLayout = new LinearLayout(mApplication);
-//
-//        WindowManager.LayoutParams params = new WindowManager.LayoutParams(1, WindowManager.LayoutParams.MATCH_PARENT);
-//        touchLayout.setLayoutParams(params);
-//        touchLayout.setOnTouchListener(touchListener);
-//
-//
-//        WindowManager.LayoutParams params2 = new WindowManager.LayoutParams(
-//                1,  // width
-//                1,  // height
-//                WindowManager.LayoutParams.TYPE_PHONE,
-//                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-//                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-//                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-//                PixelFormat.TRANSPARENT
-//        );
-//        params.gravity = Gravity.LEFT | Gravity.TOP;
-//        mWindowManager.addView(touchLayout, params2);
     }
 
     public void stopTouchTracing() {
-//        if(mWindowManager != null) {
-//            if(touchLayout != null) mWindowManager.removeView(touchLayout);
-//        }
+
     }
 
     private View.OnTouchListener touchListener = new View.OnTouchListener() {
