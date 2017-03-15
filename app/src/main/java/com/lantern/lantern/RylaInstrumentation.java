@@ -46,7 +46,7 @@ public class RylaInstrumentation extends Instrumentation {
 
     public RylaInstrumentation() {
         SharedPreferences pref = RYLA.getInstance().getContext().getSharedPreferences("pref", MODE_PRIVATE);
-        dumpTerm = pref.getInt("dump_term", 10000);
+        dumpTerm = pref.getInt("dump_term", 1000);
     }
 
     // Instrumentation 초기화 실행
