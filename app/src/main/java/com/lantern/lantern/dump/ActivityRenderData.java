@@ -64,9 +64,9 @@ public class ActivityRenderData implements DumpData {
         try {
             //type
             renderData.put("type", "render");
-            renderData.put("activityName", getActivityName());
-            renderData.put("lifecycleName", getLifecycleName());
-            renderData.put("callbackTime", getCallbackTime());
+            renderData.put("activity_name", getActivityName());
+            renderData.put("lifecycle_name", getLifecycleName());
+            renderData.put("callback_time", getCallbackTime());
 
         } catch (JSONException e) {
             e.printStackTrace();
