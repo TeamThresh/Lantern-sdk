@@ -71,7 +71,7 @@ public class DumpFileManager {
 
             deviceInfo.put("os", Build.VERSION.RELEASE);
             deviceInfo.put("app", getAppVersion());
-            deviceInfo.put("device", Build.DEVICE);
+            deviceInfo.put("device", Build.MODEL);
             deviceInfo.put("brand", Build.BRAND);
             // TODO 권한이 필요하므로 삭제
             //deviceInfo.put("UUID", getDevicesUUID());
@@ -125,6 +125,7 @@ public class DumpFileManager {
 
     //덤프 파일 읽어오기
     public String readDumpFile() {
+        Log.d("Lantern","read Dump File");
         FileInputStream inputStream;
         StringBuilder builder = new StringBuilder();
 
@@ -150,6 +151,7 @@ public class DumpFileManager {
 
     //dump data 파일에 저장하기
     public synchronized void saveDumpData(DumpData dumpData) {
+        Log.d("Lantern", "save Dump File" + dumpData.getClass());
         JSONObject resDumpJson = dumpData.getDumpData();
         JSONObject preSavedDumpData;
 

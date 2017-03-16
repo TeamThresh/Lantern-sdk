@@ -139,12 +139,6 @@ public class RYLA {
                             ActivityRenderData.STARTED,
                             System.currentTimeMillis())
             );
-
-            // 백그라운드에서 포그라운드로 넘어온 경우
-            if (isAppForeground() && !RylaInstrumentation.getInstance().isResThreadAlive()) {
-                // Resource dump 재실행
-                RylaInstrumentation.getInstance().setResThreadAlive(true);
-            }
         }
 
         @Override
@@ -156,6 +150,11 @@ public class RYLA {
                             ActivityRenderData.RESUMED,
                             System.currentTimeMillis())
             );
+            // 백그라운드에서 포그라운드로 넘어온 경우
+            if (isAppForeground() && !RylaInstrumentation.getInstance().isResThreadAlive()) {
+                // Resource dump 재실행
+                RylaInstrumentation.getInstance().setResThreadAlive(true);
+            }
         }
 
         @Override

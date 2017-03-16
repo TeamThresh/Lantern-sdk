@@ -37,7 +37,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected String doInBackground(Void... voids) {
-        Logger.d(TAG, "doInBackground");
+        Log.d(TAG, "Prepare to upload dump data");
 
         // 연결
         try {
@@ -102,7 +102,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String result){
-        Logger.d(TAG, "onPostExecute");
+        Log.d(TAG, "complete to upload dump data");
         conn.disconnect();
         DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
     }

@@ -229,7 +229,7 @@ public class ShallowDumpData implements DumpData {
             for(String key : keySet) {
                 JSONObject tempObj = new JSONObject();
                 JSONArray stackTraceData = new JSONArray();
-                tempObj.put("trace_name", key);
+                tempObj.put("thread_name", key);
                 for(StackTraceElement element : getStackTraceinfo().get(key)) {
                     stackTraceData.put(element);
                 }

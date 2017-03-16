@@ -36,10 +36,10 @@ public class ThreadTrace {
         Map<Thread, StackTraceElement[]> temp = Thread.getAllStackTraces();
         Set<Thread> tempKey = temp.keySet();
         for (Thread th : tempKey) {
-            Log.i("KEY", th.getName());
+            Logger.d("KEY", th.getName());
             List<StackTraceElement> threadStack = new ArrayList<>();
             for (StackTraceElement element : temp.get(th)) {
-                Log.i("ELEMENTS", element.toString());
+                Logger.d("ELEMENTS", element.toString());
                 threadStack.add(element);
             }
             tempThread.put(th.getName(), threadStack);
