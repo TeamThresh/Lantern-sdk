@@ -1,9 +1,12 @@
 package com.lantern.lantern.Resource;
 
 import android.os.Debug;
-import android.util.Log;
 
 import com.lantern.lantern.util.Logger;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +78,26 @@ public class MemoryResource implements Resource {
         memoryInfoList.add(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
 
         return memoryInfoList;
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject memoryData = new JSONObject();
+        try {
+            String[] labelMemory = {"max", "total", "alloc", "free"};
+            for(int i=0;i<labelMemory.length;i++) {
+                memoryData.put(labelMemory[i], memoryInfoList.get(i));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return memoryData;
+    }
+
+    @Override
+    public JSONArray toJsonArray() {
+        return null;
     }
 
     @Override

@@ -6,6 +6,10 @@ import android.util.Log;
 import com.lantern.lantern.RYLA;
 import com.lantern.lantern.util.Logger;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -65,6 +69,29 @@ public class CPUAppResource implements Resource {
     @Override
     public List<String> toList() {
         return statList;
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject cpuAppData = new JSONObject();
+        try {
+            String[] labelCpuApp = {"state", "ppid", "pgrp", "session", "tty_nr", "tpgid", "flags", "minflt", "cminflt" +
+                    "majflt", "cmajflt", "utime", "stime", "cutime", "cstime", "priority", "nice", "num_threads" +
+                    "itrealvalue", "starttime", "vsize", "rss_", "rsslim", "startcode", "endcode", "startstack" +
+                    "kstkesp", "kstkeip", "signal", "blocked", "sigignore", "sigcatch", "wchan", "nswap"};
+            for (int i = 0; i < labelCpuApp.length; i++) {
+                cpuAppData.put(labelCpuApp[i], statList.get(i));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return cpuAppData;
+    }
+
+    @Override
+    public JSONArray toJsonArray() {
+        return null;
     }
 
     @Override

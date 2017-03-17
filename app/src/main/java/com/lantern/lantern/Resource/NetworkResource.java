@@ -1,5 +1,6 @@
 package com.lantern.lantern.Resource;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,7 +37,8 @@ public class NetworkResource implements Resource {
         }
     }
 
-    public JSONObject toJSON() {
+    @Override
+    public JSONObject toJson() {
         JSONObject networkData = new JSONObject();
         try {
             if (rxtxInfo.size() != 0) {
@@ -53,5 +55,10 @@ public class NetworkResource implements Resource {
             e.printStackTrace();
         }
         return networkData;
+    }
+
+    @Override
+    public JSONArray toJsonArray() {
+        return null;
     }
 }

@@ -4,6 +4,10 @@ import android.util.Log;
 
 import com.lantern.lantern.util.Logger;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -63,6 +67,31 @@ public class CPUResource implements Resource {
     @Override
     public List<Long> toList() {
         return this.res;
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject cpuData = new JSONObject();
+
+        try {
+            String[] labelCpu = {"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"};
+            for (int i = 0; i < labelCpu.length; i++) {
+                try {
+                    cpuData.put(labelCpu[i], res.get(i));
+                } catch (IndexOutOfBoundsException e) {
+                    cpuData.put(labelCpu[i], -1);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return cpuData;
+    }
+
+    @Override
+    public JSONArray toJsonArray() {
+        return null;
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.lantern.lantern.Resource;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.List;
 
 /**
@@ -9,4 +12,6 @@ import java.util.List;
 public interface Resource {
     public List toList();
     public String toString();
+    public JSONObject toJson();
+    public JSONArray toJsonArray();
 }

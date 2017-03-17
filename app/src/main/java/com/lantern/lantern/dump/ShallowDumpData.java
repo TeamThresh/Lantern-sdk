@@ -1,14 +1,17 @@
 package com.lantern.lantern.dump;
 
+import com.lantern.lantern.Resource.ActivityStack;
+import com.lantern.lantern.Resource.CPUAppResource;
+import com.lantern.lantern.Resource.CPUResource;
+import com.lantern.lantern.Resource.MemoryResource;
 import com.lantern.lantern.Resource.NetworkResource;
+import com.lantern.lantern.Resource.StatResource;
+import com.lantern.lantern.Resource.ThreadTrace;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created by yky on 2017. 2. 13..
@@ -17,19 +20,19 @@ import java.util.Set;
 public class ShallowDumpData implements DumpData {
     private Long startTime;
     private Long endTime;
-    private List<Long> cpuInfo;
-    private List<String> cpuAppInfo;
-    private List<String> vmstatInfo;
-    private List<Long> memoryInfo;
-    private List<String> activityStackInfo;
+    private CPUResource cpuInfo;
+    private CPUAppResource cpuAppInfo;
+    private StatResource vmstatInfo;
+    private MemoryResource memoryInfo;
+    private ActivityStack activityStackInfo;
     private NetworkResource networkUsageInfo;
-    private HashMap<String, List<StackTraceElement>> stackTraceinfo;
+    private ThreadTrace stackTraceinfo;
     private HashMap<String, Long> taskTime;
 
-    public ShallowDumpData(Long startTime, Long endTime, List<Long> cpuInfo,
-                           List<String> cpuAppInfo, List<String> vmstatInfo,
-                           List<Long> memoryInfo, List<String> activityStackInfo,
-                           NetworkResource networkUsageInfo, HashMap<String, List<StackTraceElement>> stackTraceinfo,
+    public ShallowDumpData(Long startTime, Long endTime, CPUResource cpuInfo,
+                           CPUAppResource cpuAppInfo, StatResource vmstatInfo,
+                           MemoryResource memoryInfo, ActivityStack activityStackInfo,
+                           NetworkResource networkUsageInfo, ThreadTrace stackTraceinfo,
                            HashMap<String, Long> taskTime) {
         this.startTime = startTime;
         this.endTime = endTime;
@@ -61,42 +64,43 @@ public class ShallowDumpData implements DumpData {
         this.endTime = endTime;
     }
 
-    public List<Long> getCpuInfo() {
+    public CPUResource getCpuInfo() {
         return cpuInfo;
     }
 
-    public void setCpuInfo(List<Long> cpuInfo) {
+    public void setCpuInfo(CPUResource cpuInfo) {
         this.cpuInfo = cpuInfo;
     }
 
-    public List<String> getCpuAppInfo() {
+    public CPUAppResource getCpuAppInfo() {
         return cpuAppInfo;
     }
 
-    public void setCpuAppInfo(List<String> cpuAppInfo) {
+    public void setCpuAppInfo(CPUAppResource cpuAppInfo) {
         this.cpuAppInfo = cpuAppInfo;
     }
 
-    public List<String> getVmstatInfo() {
+    public StatResource getVmstatInfo() {
         return vmstatInfo;
     }
 
-    public void setVmstatInfo(List<String> vmstatInfo) {
+    public void setVmstatInfo(StatResource vmstatInfo) {
         this.vmstatInfo = vmstatInfo;
     }
-    public List<Long> getMemoryInfo() {
+
+    public MemoryResource getMemoryInfo() {
         return memoryInfo;
     }
 
-    public void setMemoryInfo(List<Long> memoryInfo) {
+    public void setMemoryInfo(MemoryResource memoryInfo) {
         this.memoryInfo = memoryInfo;
     }
 
-    public List<String> getActivityStackInfo() {
+    public ActivityStack getActivityStackInfo() {
         return activityStackInfo;
     }
 
-    public void setActivityStackInfo(List<String> activityStackInfo) {
+    public void setActivityStackInfo(ActivityStack activityStackInfo) {
         this.activityStackInfo = activityStackInfo;
     }
 
@@ -108,11 +112,11 @@ public class ShallowDumpData implements DumpData {
         this.networkUsageInfo = networkUsageInfo;
     }
 
-    public HashMap<String, List<StackTraceElement>> getStackTraceinfo() {
+    public ThreadTrace getStackTraceinfo() {
         return stackTraceinfo;
     }
 
-    public void setStackTraceinfo(HashMap<String, List<StackTraceElement>> stackTraceinfo) {
+    public void setStackTraceinfo(ThreadTrace stackTraceinfo) {
         this.stackTraceinfo = stackTraceinfo;
     }
 
@@ -153,37 +157,20 @@ public class ShallowDumpData implements DumpData {
 
     private JSONObject getParsedOsData() {
         JSONObject osData = new JSONObject();
-        JSONObject cpuData = new JSONObject();
-        JSONObject vmstatData = new JSONObject();
 
         try {
             //cpu
-            String[] labelCpu = {"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"};
-            for(int i=0;i<labelCpu.length;i++) {
-                try {
-                    cpuData.put(labelCpu[i], getCpuInfo().get(i));
-                } catch(IndexOutOfBoundsException e) {
-                    cpuData.put(labelCpu[i], -1);
-                }
-            }
-            osData.put("cpu", cpuData);
+            osData.put("cpu", getCpuInfo().toJson());
 
             // vmstat
-            String[] labelVmStat= {"r","b","swpd","free","buff","cache","si","so","bi","bo","in","cs","us","sy","id","wa"};
-            for(int i=0;i<labelVmStat.length;i++) {
-                try {
-                    vmstatData.put(labelVmStat[i], getVmstatInfo().get(i));
-                } catch(IndexOutOfBoundsException e) {
-                    vmstatData.put(labelVmStat[i], -1);
-                }
-            }
-            osData.put("vmstat", vmstatData);
+            osData.put("vmstat", getVmstatInfo().toJson());
 
             //battery
-            osData.put("battery", 10);
+            // TODO 권한 필요
+            //osData.put("battery", 10);
 
             //network_usage
-            osData.put("network_usage", getNetworkUsageInfo().toJSON());
+            osData.put("network_usage", getNetworkUsageInfo().toJson());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -193,50 +180,21 @@ public class ShallowDumpData implements DumpData {
 
     private JSONObject getParsedAppData() {
         JSONObject appData = new JSONObject();
-        JSONObject cpuAppData = new JSONObject();
-        JSONObject memoryData = new JSONObject();
-        JSONArray activityData = new JSONArray();
-        JSONArray threadList = new JSONArray();
 
+        // TODO toJson()이나 toRes() 으로 다 받을 수 있으면 좋을거 같은데...
         try {
             // cpu app
-            String[] labelCpuApp = {"state","ppid","pgrp","session","tty_nr","tpgid","flags","minflt","cminflt" +
-                    "majflt","cmajflt","utime","stime","cutime","cstime","priority","nice","num_threads" +
-                    "itrealvalue","starttime","vsize","rss_","rsslim","startcode","endcode","startstack" +
-                    "kstkesp","kstkeip","signal","blocked","sigignore","sigcatch","wchan","nswap"};
-            for(int i=0;i<labelCpuApp.length;i++) {
-                cpuAppData.put(labelCpuApp[i], getCpuAppInfo().get(i));
-            }
-            appData.put("cpu_app", cpuAppData);
+            appData.put("cpu_app", getCpuAppInfo().toJson());
 
             //memory
-            String[] labelMemory = {"max", "total", "alloc", "free"};
-            for(int i=0;i<labelMemory.length;i++) {
-                memoryData.put(labelMemory[i], getMemoryInfo().get(i));
-            }
-            appData.put("memory", memoryData);
-
+            appData.put("memory", getMemoryInfo().toJson());
 
             //activity_stack
-            for(int i=0;i<getActivityStackInfo().size();i++) {
-                activityData.put(getActivityStackInfo().get(i));
-            }
-            appData.put("activity_stack", activityData);
-
+            appData.put("activity_stack", getActivityStackInfo().toJsonArray());
 
             //thread_trace
-            Set<String> keySet = getStackTraceinfo().keySet();
-            for(String key : keySet) {
-                JSONObject tempObj = new JSONObject();
-                JSONArray stackTraceData = new JSONArray();
-                tempObj.put("thread_name", key);
-                for(StackTraceElement element : getStackTraceinfo().get(key)) {
-                    stackTraceData.put(element);
-                }
-                tempObj.put("trace_list", stackTraceData);
-                threadList.put(tempObj);
-            }
-            appData.put("thread_trace", threadList);
+            appData.put("thread_trace", getStackTraceinfo().toJsonArray());
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

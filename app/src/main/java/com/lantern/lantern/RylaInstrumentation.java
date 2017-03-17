@@ -1,15 +1,14 @@
 package com.lantern.lantern;
 
-import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.lantern.lantern.Resource.ActivityStack;
 import com.lantern.lantern.Resource.CPUAppResource;
 import com.lantern.lantern.Resource.CPUResource;
 import com.lantern.lantern.Resource.MemoryResource;
@@ -125,8 +124,8 @@ public class RylaInstrumentation extends Instrumentation {
                 CPUAppResource cpuAppInfo;
                 MemoryResource memoryInfo;
                 StatResource vmstatInfo;
-                List<String> activityStackList = new ArrayList<>();
-                HashMap<String, List<StackTraceElement>> stackTraceInfo;
+                ActivityStack activityStackList;
+                ThreadTrace stackTraceInfo;
 
                 // 각각 걸리는 시간 계산
                 long tempTime = 0;
@@ -138,13 +137,10 @@ public class RylaInstrumentation extends Instrumentation {
 
                 // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
                 tempTime = System.currentTimeMillis();
-                stackTraceInfo = new ThreadTrace().getAllThreadTracing();
+                stackTraceInfo = new ThreadTrace();
                 taskTime.put("thread_dump_time", System.currentTimeMillis() - tempTime);
 
-                for (Activity activity : RYLA.getInstance().getActivityList()) {
-                    Logger.d("ACTIVITIES", activity.getClass().getSimpleName());
-                    activityStackList.add(activity.getClass().getSimpleName());
-                }
+                activityStackList = new ActivityStack();
 
                 // NETWORK USAGE INFO
                 networkInfo = new NetworkResource();
@@ -184,10 +180,10 @@ public class RylaInstrumentation extends Instrumentation {
                         new ShallowDumpData(
                                 dumpStartTime,
                                 dumpEndTime,
-                                cpuInfo.toList(),
-                                cpuAppInfo.toList(),
-                                vmstatInfo.toList(),
-                                memoryInfo.toList(),
+                                cpuInfo,
+                                cpuAppInfo,
+                                vmstatInfo,
+                                memoryInfo,
                                 activityStackList,
                                 networkInfo,
                                 stackTraceInfo,
