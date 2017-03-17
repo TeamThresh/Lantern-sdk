@@ -48,7 +48,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(1000*60*60);
-            conn.setReadTimeout(10000);
+            conn.setReadTimeout(1000*60*60);
             conn.setRequestProperty("Cache-Control", "no-cache");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Accept", "application/json");

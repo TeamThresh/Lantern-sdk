@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -142,6 +143,9 @@ public class DumpFileManager {
                 builder.append(inputStr);
                 inputStr = reader.readLine();
             }
+        } catch (FileNotFoundException e) {
+            // 파일 없을경우 새로 생성
+            initDumpFile();
         } catch (IOException e) {
             e.printStackTrace();
         }

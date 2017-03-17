@@ -6,18 +6,13 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 
 import com.lantern.lantern.dump.ActivityRenderData;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.util.Logger;
 
-import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.ssl.SSLSocket;
 
 /**
  * Created by YS on 2017-01-25.
@@ -72,7 +67,7 @@ public class RYLA {
         startNetworkTracing();
 
         // 덤프 파일 초기화
-        DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+        //DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
 
         return mRYLA;
     }
