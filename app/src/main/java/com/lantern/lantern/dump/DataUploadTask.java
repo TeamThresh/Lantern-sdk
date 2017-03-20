@@ -7,14 +7,12 @@ import android.util.Log;
 import com.lantern.lantern.RYLA;
 import com.lantern.lantern.util.Logger;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -37,64 +35,84 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected String doInBackground(Void... voids) {
-        Log.d(TAG, "Prepare to upload dump data");
+        Logger.d(TAG, "Prepare to upload dump data");
 
-        // 연결
-        try {
-            String server_url = mContext.getSharedPreferences("pref", Context.MODE_PRIVATE).getString("server_url", SERVER_URL);
-            URL url = new URL(server_url);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.setConnectTimeout(1000*60*60);
-            conn.setReadTimeout(1000*60*60);
-            conn.setRequestProperty("Cache-Control", "no-cache");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Accept", "application/json");
+        String[] fileList = DumpFileManager.getInstance(RYLA.getInstance().getContext()).getFileList();
+        Log.d(TAG, fileList.toString());
+        // 저장된 파일 갯수 만큼 http 실행
+        for (String file : fileList) {
+            // 연결
+            try {
+                String server_url = mContext.getSharedPreferences("pref", Context.MODE_PRIVATE).getString("server_url", SERVER_URL);
+                URL url = new URL(server_url);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+                conn.setConnectTimeout(1000 * 60 * 60);
+                conn.setReadTimeout(1000 * 60 * 60);
+                conn.setRequestProperty("Cache-Control", "no-cache");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
 
-            // 데이터
-            JSONObject jsonObject = new JSONObject(DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpFile());
-            String param = jsonObject.toString();
-            Logger.d("CLASS NAME", "" +conn.getDoInput() +"/"+conn.getDoOutput());
-            Logger.d("CLASS NAME", conn.getClass().toString());
-            // 전송
-            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream());
-            osw.write(param);
+                // 데이터
+                // 전송
+                OutputStream os = conn.getOutputStream();
+                BufferedInputStream is = new BufferedInputStream(DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpStream(file));
+                byte[] buffer = new byte[1024]; // Adjust if you want
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
+                os.flush();
+                is.close();
+                os.close();
+
+
+            /*OutputStream os = conn.getOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(os);
+            osw.write(DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpFile());
             osw.flush();
 
-            // 응답
-            InputStream inputStream;
-
-            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                inputStream = conn.getErrorStream();
-            } else {
-                inputStream = conn.getInputStream();
-            }
-            BufferedReader br = null;
-            br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                Logger.d(TAG, "response : " + line);
-            }
-
-            // 닫기
             osw.close();
-            inputStream.close();
-            br.close();
+            os.close()*/
+                ;
 
-            return null;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+                // 응답
+                InputStream inputStream;
+
+                // 전송 응답 받음
+                if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    inputStream = conn.getErrorStream();
+                } else {
+                    inputStream = conn.getInputStream();
+                }
+                BufferedReader br = null;
+                br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    Logger.d(TAG, "response : " + line);
+                }
+
+                // 닫기
+                inputStream.close();
+                br.close();
+
+                // 파일 전송에 성공한 경우 파일제거
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    DumpFileManager.getInstance(RYLA.getInstance().getContext()).deleteDumpFile(file);
+                }
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         return null;
@@ -102,8 +120,10 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String result){
+        //Log.d("Post Execute", result);
         Log.d(TAG, "complete to upload dump data");
-        conn.disconnect();
+        if (conn != null)
+            conn.disconnect();
         DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
     }
 }

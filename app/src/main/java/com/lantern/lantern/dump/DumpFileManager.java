@@ -14,11 +14,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.UUID;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -29,7 +32,8 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class DumpFileManager {
     private final String TAG = "DumpFileManager";
-    private final String DUMP_FILE_NAME = "ryla_dump";
+    public static final String FILE_NAME_HEADER = "ryladump";
+    private static String FILE_NAME = "";
 
     private Context mContext;
 
@@ -54,6 +58,13 @@ public class DumpFileManager {
         Logger.d(TAG,"initDumpFile");
         //덤프 헤더 파일 작성
         dumpJson = getDumpHeader();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        FILE_NAME = FILE_NAME_HEADER + "_" +
+                calendar.get(Calendar.YEAR) + (calendar.get(Calendar.MONTH) + 1) +
+                calendar.get(Calendar.DAY_OF_MONTH) + "_" + calendar.getTimeInMillis();
+        Log.d("FILENAME", FILE_NAME);
 
         //덤프 헤더를 파일에 저장
         saveDumpFile(dumpJson.toString());
@@ -116,7 +127,7 @@ public class DumpFileManager {
         FileOutputStream outputStream;
 
         try {
-            outputStream = mContext.openFileOutput(DUMP_FILE_NAME, Context.MODE_PRIVATE);
+            outputStream = mContext.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
             outputStream.write(dumpFileString.getBytes());
             outputStream.close();
         } catch (IOException e) {
@@ -124,15 +135,78 @@ public class DumpFileManager {
         }
     }
 
+    public synchronized FileInputStream readDumpStream() {
+        FileInputStream inputStream = null;
+        StringBuilder builder = new StringBuilder();
+
+        try {
+            String inputStr;
+            inputStream = mContext.openFileInput(FILE_NAME);
+
+        } catch (FileNotFoundException e) {
+            // 파일 없을경우 새로 생성
+            initDumpFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+
+    public synchronized FileInputStream readDumpStream(String fileName) {
+        FileInputStream inputStream = null;
+        StringBuilder builder = new StringBuilder();
+
+        try {
+            String inputStr;
+            inputStream = mContext.openFileInput(fileName);
+
+        } catch (FileNotFoundException e) {
+            // 파일 없을경우 새로 생성
+            initDumpFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+
     //덤프 파일 읽어오기
-    public String readDumpFile() {
+    public synchronized String readDumpFile() {
         Log.d("Lantern","read Dump File");
         FileInputStream inputStream;
         StringBuilder builder = new StringBuilder();
 
         try {
             String inputStr;
-            inputStream = mContext.openFileInput(DUMP_FILE_NAME);
+            inputStream = mContext.openFileInput(FILE_NAME);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            inputStr = reader.readLine();
+
+            while(inputStr != null) {
+                //buffer.append(inputStr + "\n");
+                //builder.append(inputStr + "\n");
+                builder.append(inputStr);
+                inputStr = reader.readLine();
+            }
+        } catch (FileNotFoundException e) {
+            // 파일 없을경우 새로 생성
+            initDumpFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return builder.toString();
+    }
+
+    //덤프 파일 읽어오기
+    public synchronized String readDumpFile(String fileName) {
+        Log.d("Lantern","read Dump File");
+        FileInputStream inputStream;
+        StringBuilder builder = new StringBuilder();
+
+        try {
+            String inputStr;
+            inputStream = mContext.openFileInput(fileName);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
             inputStr = reader.readLine();
@@ -164,9 +238,39 @@ public class DumpFileManager {
             preSavedDumpData.getJSONArray("data").put(resDumpJson);
             saveDumpFile(preSavedDumpData.toString());
 
-            Logger.d(TAG, new JSONObject(readDumpFile()).toString(2));
+            //Logger.d(TAG, new JSONObject(readDumpFile()).toString(2));
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    public String[] getFileList() {
+        File file = mContext.getFilesDir();
+        String[] allList = file.list();
+        ArrayList<String> lanternList = new ArrayList<>();
+        for(String name: allList) {
+            Log.d("ALL FILELIST NAME", name);
+            if (name.split("_")[0].equals(FILE_NAME_HEADER)) {
+                Log.d("FILELIST NAME", name);
+                lanternList.add(name);
+            } else if (name.split("_")[0].equals("ryla")) {
+                mContext.deleteFile(name);
+            }
+        }
+        Log.d("FILELIST", lanternList.toString());
+
+        if (lanternList.size() == 0){
+            return new String[] {};
+        } else {
+            return lanternList.toArray(new String[lanternList.size()]);
+        }
+    }
+
+    public synchronized void deleteDumpFile(String fileName) {
+        if (mContext.deleteFile(fileName)) {
+            Log.d("File delete", "파일 지우기 성공");
+        } else {
+            Log.d("File delete", "파일 지우기 실패");
         }
     }
 }

@@ -42,6 +42,7 @@ public class RylaInstrumentation extends Instrumentation {
     static List<Long> usages1 = new ArrayList<>();
 
     private static int dumpTerm;
+    private static int dumpCount = 0;
 
     public RylaInstrumentation() {
         SharedPreferences pref = RYLA.getInstance().getContext().getSharedPreferences("pref", MODE_PRIVATE);
@@ -117,6 +118,14 @@ public class RylaInstrumentation extends Instrumentation {
                     continue;
                 }
 
+                if (dumpCount > 300) {  // 5분동안 실행
+                    // 파일 재생성
+                    DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+                    // 카운트 초기화
+                    dumpCount = 0;
+                } else {
+                    dumpCount++;
+                }
                 //Dataset for dump file
                 Long dumpStartTime, dumpEndTime;
                 NetworkResource networkInfo;
