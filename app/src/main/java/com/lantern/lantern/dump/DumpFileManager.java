@@ -188,6 +188,8 @@ public class DumpFileManager {
                 builder.append(inputStr);
                 inputStr = reader.readLine();
             }
+
+            inputStream.close();
         } catch (FileNotFoundException e) {
             // 파일 없을경우 새로 생성
             initDumpFile();

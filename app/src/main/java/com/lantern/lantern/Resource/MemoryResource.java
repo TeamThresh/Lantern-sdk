@@ -29,6 +29,11 @@ public class MemoryResource implements Resource {
     public MemoryResource() {
         memoryInfoList.clear();
 
+        memoryInfoList.add(Runtime.getRuntime().maxMemory());
+        memoryInfoList.add(Runtime.getRuntime().totalMemory());
+        memoryInfoList.add(Runtime.getRuntime().freeMemory());
+        memoryInfoList.add(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+
         this.natHeapSize = Debug.getNativeHeapSize();
         this.natHeapFreeSize = Debug.getNativeHeapFreeSize();
         this.pss = Debug.getPss();

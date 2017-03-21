@@ -56,6 +56,8 @@ public class CPUResource implements Resource {
             }
 
             usages1 = usages2;
+
+            reader.close();
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         } catch (Exception e) {

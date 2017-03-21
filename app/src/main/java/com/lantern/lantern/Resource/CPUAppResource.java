@@ -59,6 +59,8 @@ public class CPUAppResource implements Resource {
             for (String token : toks) {
                 statList.add(token);
             }
+
+            reader.close();
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         } catch (Exception e) {
