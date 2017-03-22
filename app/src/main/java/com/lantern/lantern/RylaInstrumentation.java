@@ -67,7 +67,11 @@ public class RylaInstrumentation extends Instrumentation {
         Logger.d("RylaInstrumentation", "excute");
         isResThreadAlive = true;
 
+        // TODO 보낼때 파일을 마무리하지않는게 좋을것 같음
+        // TODO 아니면 저장 형태를 바꿀것
         new DataUploadTask(RYLA.getInstance().getContext()).execute();
+        DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+        dumpCount = 0;
 
         if (rylaInstrumentation != null) {
             rylaInstrumentation.start();
@@ -94,7 +98,12 @@ public class RylaInstrumentation extends Instrumentation {
 
         // 터치
         if (isAlive) {
+            // TODO 보낼때 파일을 마무리하지않는게 좋을것 같음
+            // TODO 아니면 저장 형태를 바꿀것
             new DataUploadTask(RYLA.getInstance().getContext()).execute();
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+
+            dumpCount = 0;
             startTouchTracing(RYLA.getInstance().getContext());
         } else {
             stopTouchTracing();
@@ -110,6 +119,8 @@ public class RylaInstrumentation extends Instrumentation {
 
     @Override
     public void onStart() {
+        //WeakReference<ShallowDumpData> shallowDumpData = new WeakReference<>(new ShallowDumpData());
+        ShallowDumpData shallowDumpData = new ShallowDumpData();
         while (true) {
             if (isResThreadAlive) {
                 if (!isAppForeground()) {
@@ -183,22 +194,20 @@ public class RylaInstrumentation extends Instrumentation {
                 // 종료시간
                 dumpEndTime = System.currentTimeMillis();
                 Logger.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
-
-                //save res dump file
-                DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
-                        new ShallowDumpData(
-                                dumpStartTime,
-                                dumpEndTime,
-                                cpuInfo,
-                                cpuAppInfo,
-                                vmstatInfo,
-                                memoryInfo,
-                                activityStackList,
-                                networkInfo,
-                                stackTraceInfo,
-                                taskTime
-                        )
+                shallowDumpData.setDumpData(
+                        dumpStartTime,
+                        dumpEndTime,
+                        cpuInfo,
+                        cpuAppInfo,
+                        vmstatInfo,
+                        memoryInfo,
+                        activityStackList,
+                        networkInfo,
+                        stackTraceInfo,
+                        taskTime
                 );
+                //save res dump file
+                DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(shallowDumpData);
             }
             try {
                 Thread.sleep(dumpTerm);

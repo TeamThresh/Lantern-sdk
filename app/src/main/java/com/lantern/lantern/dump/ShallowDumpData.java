@@ -29,11 +29,15 @@ public class ShallowDumpData implements DumpData {
     private ThreadTrace stackTraceinfo;
     private HashMap<String, Long> taskTime;
 
-    public ShallowDumpData(Long startTime, Long endTime, CPUResource cpuInfo,
-                           CPUAppResource cpuAppInfo, StatResource vmstatInfo,
-                           MemoryResource memoryInfo, ActivityStack activityStackInfo,
-                           NetworkResource networkUsageInfo, ThreadTrace stackTraceinfo,
-                           HashMap<String, Long> taskTime) {
+    public ShallowDumpData() {
+
+    }
+
+    public void setDumpData(Long startTime, Long endTime, CPUResource cpuInfo,
+                            CPUAppResource cpuAppInfo, StatResource vmstatInfo,
+                            MemoryResource memoryInfo, ActivityStack activityStackInfo,
+                            NetworkResource networkUsageInfo, ThreadTrace stackTraceinfo,
+                            HashMap<String, Long> taskTime) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.cpuInfo = cpuInfo;

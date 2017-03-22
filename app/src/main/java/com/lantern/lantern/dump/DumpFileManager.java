@@ -14,12 +14,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.UUID;
@@ -38,6 +41,7 @@ public class DumpFileManager {
     private Context mContext;
 
     private JSONObject dumpJson;
+    private boolean isFirstData = false;
 
     private static DumpFileManager dumpFileManager;
 
@@ -57,7 +61,7 @@ public class DumpFileManager {
     public void initDumpFile() {
         Logger.d(TAG,"initDumpFile");
         //덤프 헤더 파일 작성
-        dumpJson = getDumpHeader();
+        //dumpJson = getDumpHeader();
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
@@ -67,7 +71,50 @@ public class DumpFileManager {
         Log.d("FILENAME", FILE_NAME);
 
         //덤프 헤더를 파일에 저장
-        saveDumpFile(dumpJson.toString());
+        initDumpHead();
+        //saveDumpFile(dumpJson.toString());
+    }
+
+    private void initDumpHead() {
+        try {
+            File f= new File(mContext.getFilesDir().toString()+"/"+FILE_NAME);
+
+            if(!f.exists()) {
+                f.createNewFile();
+            }
+
+            PrintWriter pww= new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
+            pww.write("{\"launch_time\":\""+System.currentTimeMillis()+"\","+
+                    "\"dump_interval\":\""+mContext.getSharedPreferences("pref", MODE_PRIVATE).getInt("dump_term", 1000)+"\","+
+                    "\"package_name\":\""+mContext.getPackageName()+"\","+
+                    "\"device_info\":{"+
+                    "\"os\":\""+Build.VERSION.RELEASE+"\","+
+                    "\"app\":\""+getAppVersion()+"\","+
+                    "\"device\":\""+Build.MODEL+"\","+
+                    "\"brand\":\""+Build.BRAND+"\"},"+
+                    "\"data\":[");
+            isFirstData = true;
+            pww.flush();
+
+            pww.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void endDumpFooter() {
+        try {
+            File f= new File(mContext.getFilesDir().toString()+"/"+FILE_NAME);
+
+            PrintWriter pww= new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
+            pww.write("]}");
+
+            pww.flush();
+
+            pww.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //덤프 헤더 JSON 생성하기
@@ -188,7 +235,6 @@ public class DumpFileManager {
                 builder.append(inputStr);
                 inputStr = reader.readLine();
             }
-
             inputStream.close();
         } catch (FileNotFoundException e) {
             // 파일 없을경우 새로 생성
@@ -233,7 +279,7 @@ public class DumpFileManager {
     public synchronized void saveDumpData(DumpData dumpData) {
         Log.d("Lantern", "save Dump File" + dumpData.getClass());
         JSONObject resDumpJson = dumpData.getDumpData();
-        JSONObject preSavedDumpData;
+        /*JSONObject preSavedDumpData;
 
         try {
             preSavedDumpData = new JSONObject(readDumpFile());
@@ -242,6 +288,25 @@ public class DumpFileManager {
 
             //Logger.d(TAG, new JSONObject(readDumpFile()).toString(2));
         } catch (JSONException e) {
+            e.printStackTrace();
+        }*/
+
+        // File Append
+        try {
+            Log.d("dumpdata", resDumpJson.toString());
+            Log.d("directory path",mContext.getFilesDir().toString()+"/"+FILE_NAME);
+            File f= new File(mContext.getFilesDir().toString()+"/"+FILE_NAME);
+            PrintWriter pww = new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
+
+            if (isFirstData) {
+                pww.write(resDumpJson.toString());
+                isFirstData = false;
+            } else pww.write(","+resDumpJson.toString());
+
+            pww.flush();
+
+            pww.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -252,10 +317,12 @@ public class DumpFileManager {
         ArrayList<String> lanternList = new ArrayList<>();
         for(String name: allList) {
             Log.d("ALL FILELIST NAME", name);
-            if (name.split("_")[0].equals(FILE_NAME_HEADER)) {
-                Log.d("FILELIST NAME", name);
+            String[] splited = name.split("_");
+            if (splited[0].equals(FILE_NAME_HEADER)) {
+                if (!name.equals(FILE_NAME))
+                    Log.d("FILELIST NAME", name);
                 lanternList.add(name);
-            } else if (name.split("_")[0].equals("ryla")) {
+            } else if (splited[0].equals("ryla")) {
                 mContext.deleteFile(name);
             }
         }

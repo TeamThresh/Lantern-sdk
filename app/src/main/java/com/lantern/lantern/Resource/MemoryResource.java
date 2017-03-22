@@ -88,13 +88,15 @@ public class MemoryResource implements Resource {
     @Override
     public JSONObject toJson() {
         JSONObject memoryData = new JSONObject();
-        try {
-            String[] labelMemory = {"max", "total", "alloc", "free"};
-            for(int i=0;i<labelMemory.length;i++) {
-                memoryData.put(labelMemory[i], memoryInfoList.get(i));
+        if (memoryInfoList.size() > 0) {
+            try {
+                String[] labelMemory = {"max", "total", "alloc", "free"};
+                for (int i = 0; i < labelMemory.length; i++) {
+                    memoryData.put(labelMemory[i], memoryInfoList.get(i));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
 
         return memoryData;

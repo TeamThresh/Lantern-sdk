@@ -26,7 +26,8 @@ import java.net.URL;
 public class DataUploadTask extends AsyncTask<Void, Void, String> {
     private final String TAG = "DataUploadTask";
     private Context mContext;
-    private final static String SERVER_URL = "http://61.43.139.16:3000/api/upload";
+    //private final static String SERVER_URL = "http://61.43.139.16:3000/api/upload";
+    private final static String SERVER_URL = "http://172.16.100.61:3000/api/upload";
     private HttpURLConnection conn;
 
     public DataUploadTask(Context context) {
@@ -41,6 +42,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
         Log.d(TAG, fileList.toString());
         // 저장된 파일 갯수 만큼 http 실행
         for (String file : fileList) {
+
             // 연결
             try {
                 String server_url = mContext.getSharedPreferences("pref", Context.MODE_PRIVATE).getString("server_url", SERVER_URL);
@@ -64,6 +66,9 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
                 while ((bytesRead = is.read(buffer)) != -1) {
                     os.write(buffer, 0, bytesRead);
                 }
+                String footer = "]}";
+                os.write(footer.getBytes(), 0, footer.length());
+
                 os.flush();
                 is.close();
                 os.close();
@@ -124,7 +129,6 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
         Log.d(TAG, "complete to upload dump data");
         if (conn != null)
             conn.disconnect();
-        DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
     }
 }
 

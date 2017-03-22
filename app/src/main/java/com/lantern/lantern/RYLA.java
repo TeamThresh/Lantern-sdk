@@ -3,7 +3,10 @@ package com.lantern.lantern;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Looper;
 
@@ -54,6 +57,9 @@ public class RYLA {
         Logger.d("RYLA", "setContext 실행");
         mApplication = application;
 
+        // 스크린 OnOff 등록
+        installScreenOffListner();
+
         // 디바이스 정보
         DeviceInfo.printDeviceInfo();
 
@@ -68,6 +74,11 @@ public class RYLA {
 
         // 덤프 파일 초기화
         //DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+/*
+        String[] fileList = DumpFileManager.getInstance(RYLA.getInstance().getContext()).getFileList();
+        for (String file : fileList) {
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).deleteDumpFile(file);
+        }*/
 
         return mRYLA;
     }
@@ -76,6 +87,46 @@ public class RYLA {
         activityName = ((Activity) context).getLocalClassName();
 
         return mRYLA;
+    }
+
+    public void installScreenOffListner() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+/*
+        class ScreenOnReceiver extends BroadcastReceiver {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                Log.d("SmartPortal", "ScreenOnReceiver, onReceive:" + action);
+                if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                    ...
+                }
+                else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+
+                    ...
+
+                }
+            }
+        }
+*/
+
+        BroadcastReceiver screenOnOff = new BroadcastReceiver() {
+            public static final String ScreenOff = "android.intent.action.SCREEN_OFF";
+            public static final String ScreenOn = "android.intent.action.SCREEN_ON";
+
+            public void onReceive(Context contex, Intent intent) {
+                if (intent.getAction().equals(ScreenOff)) {
+                    // Resource dump 일시중지
+                    RylaInstrumentation.getInstance().setResThreadAlive(false);
+                } else if (intent.getAction().equals(ScreenOn)) {
+                    // Resource dump 재실행
+                    RylaInstrumentation.getInstance().setResThreadAlive(true);
+                }
+            }
+        };
+
+        getContext().registerReceiver(screenOnOff, intentFilter);
+
     }
 
     // 예외처리 핸들러 등록
