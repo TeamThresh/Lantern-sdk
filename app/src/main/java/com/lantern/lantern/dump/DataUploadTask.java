@@ -74,14 +74,17 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
                 os.close();
 
 
-            /*OutputStream os = conn.getOutputStream();
-            OutputStreamWriter osw = new OutputStreamWriter(os);
-            osw.write(DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpFile());
-            osw.flush();
+                // 파일 전송을 완료한 경우 파일제거
+                DumpFileManager.getInstance(RYLA.getInstance().getContext()).deleteDumpFile(file);
 
-            osw.close();
-            os.close()*/
-                ;
+                /*OutputStream os = conn.getOutputStream();
+                OutputStreamWriter osw = new OutputStreamWriter(os);
+                osw.write(DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpFile());
+                osw.flush();
+
+                osw.close();
+                os.close();*/
+
 
                 // 응답
                 InputStream inputStream;
@@ -103,11 +106,6 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
                 // 닫기
                 inputStream.close();
                 br.close();
-
-                // 파일 전송에 성공한 경우 파일제거
-                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    DumpFileManager.getInstance(RYLA.getInstance().getContext()).deleteDumpFile(file);
-                }
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
