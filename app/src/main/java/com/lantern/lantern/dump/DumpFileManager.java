@@ -66,6 +66,7 @@ public class DumpFileManager {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         FILE_NAME = FILE_NAME_HEADER + "_" +
+                mContext.getPackageName() + "_" +
                 calendar.get(Calendar.YEAR) + (calendar.get(Calendar.MONTH) + 1) +
                 calendar.get(Calendar.DAY_OF_MONTH) + "_" + calendar.getTimeInMillis();
         Log.d("FILENAME", FILE_NAME);
@@ -318,7 +319,8 @@ public class DumpFileManager {
         for(String name: allList) {
             Log.d("ALL FILELIST NAME", name);
             String[] splited = name.split("_");
-            if (splited[0].equals(FILE_NAME_HEADER)) {
+            if (splited[0].equals(FILE_NAME_HEADER)
+            && splited[1].equals(mContext.getPackageName())) {
                 if (!name.equals(FILE_NAME))
                     Log.d("FILELIST NAME", name);
                 lanternList.add(name);
