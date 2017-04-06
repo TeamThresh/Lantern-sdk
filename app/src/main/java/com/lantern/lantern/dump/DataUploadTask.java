@@ -39,7 +39,9 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
         Logger.d(TAG, "Prepare to upload dump data");
 
         String[] fileList = DumpFileManager.getInstance(RYLA.getInstance().getContext()).getFileList();
-        Log.d(TAG, fileList.toString());
+        for (String fileName : fileList) {
+            Log.d(TAG, fileName);
+        }
         // 저장된 파일 갯수 만큼 http 실행
         for (String file : fileList) {
 
@@ -100,6 +102,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
                 String line = null;
                 while ((line = br.readLine()) != null) {
+                    Log.d(TAG, "response : " + line);
                     Logger.d(TAG, "response : " + line);
                 }
 

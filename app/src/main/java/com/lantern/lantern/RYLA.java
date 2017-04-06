@@ -14,8 +14,12 @@ import com.lantern.lantern.dump.ActivityRenderData;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.util.Logger;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.SSLSocket;
 
 /**
  * Created by YS on 2017-01-25.
@@ -118,7 +122,8 @@ public class RYLA {
                 if (intent.getAction().equals(ScreenOff)) {
                     // Resource dump 일시중지
                     RylaInstrumentation.getInstance().setResThreadAlive(false);
-                } else if (intent.getAction().equals(ScreenOn)) {
+                } else if (intent.getAction().equals(ScreenOn)
+                        && !RylaInstrumentation.getInstance().isResThreadAlive()) {
                     // Resource dump 재실행
                     RylaInstrumentation.getInstance().setResThreadAlive(true);
                 }
@@ -273,14 +278,14 @@ public class RYLA {
     public void startNetworkTracing() {
         //URL.setURLStreamHandlerFactory(new LanternURLStreamHandlerFactory());
 
-//        try {
-//            // TODO 응답 시간 가져올것 (connect ~ close 까지)
-//            LanternSocketFactory sf = new LanternSocketFactory();
-//            Socket.setSocketImplFactory(sf);
-//            SSLSocket.setSocketImplFactory(sf);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            // TODO 응답 시간 가져올것 (connect ~ close 까지)
+            LanternSocketFactory sf = new LanternSocketFactory();
+            Socket.setSocketImplFactory(sf);
+            SSLSocket.setSocketImplFactory(sf);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void startRender() {

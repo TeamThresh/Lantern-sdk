@@ -2,9 +2,8 @@ package com.lantern.lantern;
 
 import android.util.Log;
 
-import com.lantern.lantern.network.SocketMonitoringInputStream;
-import com.lantern.lantern.network.SocketMonitoringOutputStream;
-import com.lantern.lantern.util.Logger;
+import com.lantern.lantern.dump.DumpFileManager;
+import com.lantern.lantern.dump.NetworkResponseData;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class LanternSocketImpl extends SocketImpl {
     }
 
     protected void create(boolean isStreaming) throws IOException {
-        Logger.d("Socket Impl", "create");
+        Log.d("Socket Impl", "create");
         try {
             this.delegator.invoke(new Object[]{Boolean.valueOf(isStreaming)});
         } catch (Exception var5) {
@@ -54,7 +53,7 @@ public class LanternSocketImpl extends SocketImpl {
 
     protected void bind(InetAddress address, int port) throws IOException {
         this.name = address.getHostName();
-        Logger.d("Socket bind", this.name);
+        Log.d("Socket bind", this.name);
         try {
             this.delegator.invoke(new Object[]{address, Integer.valueOf(port)});
         } catch (Exception var6) {
@@ -104,7 +103,7 @@ public class LanternSocketImpl extends SocketImpl {
 
     protected void connect(InetAddress address, int port) throws IOException {
         this.name = address.getHostName();
-        Logger.d("Socket connect", this.name);
+        Log.d("Socket connect", this.name);
         try {
             this.delegator.delegateTo("connect", new Class[]{InetAddress.class, Integer.TYPE}).invoke(new Object[]{address, Integer.valueOf(port)});
         } catch (Exception var6) {
@@ -131,7 +130,7 @@ public class LanternSocketImpl extends SocketImpl {
         } else {
             this.name = remoteAddr.toString();
         }
-        Logger.d("Socket connect", this.name);
+        Log.d("Socket connect", this.name);
 
         try {
             this.delegator.invoke(new Object[]{remoteAddr, Integer.valueOf(timeout)});
@@ -152,7 +151,7 @@ public class LanternSocketImpl extends SocketImpl {
 
     protected void connect(String host, int port) throws IOException {
         this.name = host;
-        Logger.d("Socket connect", this.name);
+        Log.d("Socket connect", this.name);
 
         try {
             this.delegator.invoke(new Object[]{host, Integer.valueOf(port)});
@@ -173,7 +172,11 @@ public class LanternSocketImpl extends SocketImpl {
     }
 
     protected void close() throws IOException {
-        Logger.d("Socket connection time", (System.currentTimeMillis() - this.startTime) + "");
+        Log.d("Socket connection time", (System.currentTimeMillis() - this.startTime) + "");
+
+        DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                new NetworkResponseData(this.startTime, System.currentTimeMillis(), this.name)
+        );
 
         try {
             this.delegator.invoke(new Object[0]);
@@ -201,7 +204,8 @@ public class LanternSocketImpl extends SocketImpl {
                 throw (IOException)var3;
             }
         }
-        return new SocketMonitoringInputStream(stream);
+        return stream;
+        //return new SocketMonitoringInputStream(stream);
     }
 
     public Object getOption(int optID) throws SocketException {
@@ -225,7 +229,8 @@ public class LanternSocketImpl extends SocketImpl {
 
             var3.printStackTrace();
         }
-        return new SocketMonitoringOutputStream(out);
+        return out;
+        //return new SocketMonitoringOutputStream(out);
     }
 
     protected void listen(int backlog) throws IOException {

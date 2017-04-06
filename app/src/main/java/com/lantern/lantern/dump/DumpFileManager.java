@@ -320,10 +320,12 @@ public class DumpFileManager {
             Log.d("ALL FILELIST NAME", name);
             String[] splited = name.split("_");
             if (splited[0].equals(FILE_NAME_HEADER)
-            && splited[1].equals(mContext.getPackageName())) {
-                if (!name.equals(FILE_NAME))
+                    && splited[1].equals(mContext.getPackageName())) {
+                // 현재 파일 제외 (아직 쓰고있음)
+                if (!name.equals(FILE_NAME)) {
                     Log.d("FILELIST NAME", name);
-                lanternList.add(name);
+                    lanternList.add(name);
+                }
             } else if (splited[0].equals("ryla")) {
                 mContext.deleteFile(name);
             }
