@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 
 import com.lantern.lantern.dump.ActivityRenderData;
 import com.lantern.lantern.dump.DumpFileManager;
@@ -183,6 +184,7 @@ public class RYLA {
         @Override
         public void onActivityStarted(Activity activity) {
             Logger.d("Lifecycle", "Started");
+            RYLA.getInstance().endRender("onStart");
             RYLA.getInstance().getThreadTracing();
 
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
@@ -195,7 +197,7 @@ public class RYLA {
         @Override
         public void onActivityResumed(Activity activity) {
             Logger.d("Lifecycle", "Resumed");
-            RYLA.getInstance().endRender();
+            RYLA.getInstance().endRender("onResume");
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.RESUMED,
@@ -288,16 +290,16 @@ public class RYLA {
         }
     }
 
-    public void startRender() {
-        Logger.d("ASM TEST", "TEST!!!!!!!!");
+    public void startRender(String lifecycleName) {
+        Log.d("ASM TEST", "TEST!!!!!!!!");
 
         startTime = System.currentTimeMillis();
-        Logger.d("START Activity Time", "Name: "+activityName + ", Time: "+startTime);
+        Log.d("START Activity Time", "Activity Name: " + activityName + ", LFC Name: "+ lifecycleName + ", Time: "+startTime);
     }
 
-    public void endRender() {
+    public void endRender(String lifecycleName) {
         endTime = System.currentTimeMillis();
-        Logger.d("END Activity Time", "Name: "+activityName + ", Time: "+endTime);
+        Log.d("END Activity Time", "Activity Name: " + activityName + ", LFC Name: "+ lifecycleName + ", Time: "+endTime);
         // TODO Save Render time info
     }
 }
