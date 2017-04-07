@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 
 import com.lantern.lantern.dump.ActivityRenderData;
@@ -98,22 +97,6 @@ public class RYLA {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-/*
-        class ScreenOnReceiver extends BroadcastReceiver {
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                Log.d("SmartPortal", "ScreenOnReceiver, onReceive:" + action);
-                if (action.equals(Intent.ACTION_SCREEN_ON)) {
-                    ...
-                }
-                else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-
-                    ...
-
-                }
-            }
-        }
-*/
 
         BroadcastReceiver screenOnOff = new BroadcastReceiver() {
             public static final String ScreenOff = "android.intent.action.SCREEN_OFF";
@@ -151,20 +134,7 @@ public class RYLA {
         RylaInstrumentation.getInstance().excute();
     }
 
-    // Thread Stack 가져옴
-    public List<String> getThreadTracing() {
-        List<String> stackTraceLines = new ArrayList<>();
-
-        Thread t = Looper.getMainLooper().getThread();
-        StackTraceElement[] stackTraceList = t.getStackTrace();
-        for(StackTraceElement stackTrace : stackTraceList) {
-            Logger.d("STACK TRACE", stackTrace.toString());
-            stackTraceLines.add(stackTrace.toString());
-        }
-
-        return stackTraceLines;
-    }
-
+    // Declare Activity Lifecycle Callback
     private static Application.ActivityLifecycleCallbacks alcb = new Application.ActivityLifecycleCallbacks() {
 
         @Override
@@ -184,8 +154,7 @@ public class RYLA {
         @Override
         public void onActivityStarted(Activity activity) {
             Logger.d("Lifecycle", "Started");
-            RYLA.getInstance().endRender("onStart");
-            RYLA.getInstance().getThreadTracing();
+            //RYLA.getInstance().endRender("onStart");
 
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
@@ -197,7 +166,7 @@ public class RYLA {
         @Override
         public void onActivityResumed(Activity activity) {
             Logger.d("Lifecycle", "Resumed");
-            RYLA.getInstance().endRender("onResume");
+            //RYLA.getInstance().endRender("onResume");
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.RESUMED,

@@ -20,9 +20,7 @@ import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.ShallowDumpData;
 import com.lantern.lantern.util.Logger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.lantern.lantern.RYLA.isAppForeground;
@@ -38,8 +36,6 @@ public class RylaInstrumentation extends Instrumentation {
 
     // linear layout will use to detect touch event
     private LinearLayout touchLayout;
-
-    static List<Long> usages1 = new ArrayList<>();
 
     private static int dumpTerm;
     private static int dumpCount = 0;
@@ -93,6 +89,7 @@ public class RylaInstrumentation extends Instrumentation {
         return isResThreadAlive;
     }
 
+    // TODO RYLA 로 옮겨서 alive가 끝나면 instrumentation을 종료하고 새로 시작
     public void setResThreadAlive(boolean isAlive) {
         isResThreadAlive = isAlive;
 
