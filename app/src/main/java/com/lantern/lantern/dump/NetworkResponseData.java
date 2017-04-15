@@ -1,5 +1,7 @@
 package com.lantern.lantern.dump;
 
+import com.lantern.lantern.network.NetworkCallbackData;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,14 +10,10 @@ import org.json.JSONObject;
  */
 
 public class NetworkResponseData implements DumpData {
-    long requestTime;
-    long responseTime;
-    String host;
+    NetworkCallbackData networkResponseData;
 
-    public NetworkResponseData(long requestTime, long responseTime, String host) {
-        this.requestTime = requestTime;
-        this.responseTime = responseTime;
-        this.host = host;
+    public NetworkResponseData(NetworkCallbackData networkResponseData) {
+        this.networkResponseData = networkResponseData;
     }
 
     @Override
@@ -27,9 +25,10 @@ public class NetworkResponseData implements DumpData {
             networkData.put("type", "request");
 
             // network info
-            networkData.put("request_time", this.requestTime);
-            networkData.put("response_time", this.responseTime);
-            networkData.put("host", this.host);
+            networkData.put("request_time", networkResponseData.getStartTime());
+            networkData.put("response_time", networkResponseData.getEndTime());
+            networkData.put("host", networkResponseData.getHostName());
+            networkData.put("status", networkResponseData.getStatus());
 
         } catch (JSONException e) {
             e.printStackTrace();

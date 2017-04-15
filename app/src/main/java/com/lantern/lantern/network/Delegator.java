@@ -1,4 +1,4 @@
-package com.lantern.lantern;
+package com.lantern.lantern.network;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

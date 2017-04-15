@@ -1,6 +1,4 @@
-package com.lantern.lantern;
-
-import android.util.Log;
+package com.lantern.lantern.network;
 
 import com.lantern.lantern.util.Logger;
 

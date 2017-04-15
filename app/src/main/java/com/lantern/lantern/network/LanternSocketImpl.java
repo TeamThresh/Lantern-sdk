@@ -1,7 +1,9 @@
-package com.lantern.lantern;
+package com.lantern.lantern.network;
 
+import android.os.Message;
 import android.util.Log;
 
+import com.lantern.lantern.RYLA;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.NetworkResponseData;
 
@@ -29,8 +31,46 @@ public class LanternSocketImpl extends SocketImpl {
     private long startTime;
     private boolean readingDone = false;
 
+    private NetworkCallbackData networkCallbackData;
+    public NetworkCallback networkCallback;
+
+    public static final int CLOSE_MSG = 100;
+    public static final int STATUS_MSG = 101;
+
     public LanternSocketImpl() {
         this.delegator = new Delegator(this, SocketImpl.class, "java.net.PlainSocketImpl");
+
+        networkCallback = new NetworkCallback() {
+            @Override
+            public void complete(Message msg) {
+                switch (msg.what) {
+                    case CLOSE_MSG:
+                        NetworkCallbackData closeCallbackData = (NetworkCallbackData) msg.obj;
+                        if (networkCallbackData == null) {
+                            networkCallbackData = closeCallbackData ;
+                        } else {
+                            networkCallbackData.setHostName(closeCallbackData.getHostName());
+                            networkCallbackData.setStartTime(closeCallbackData.getStartTime());
+                            networkCallbackData.setEndTime(closeCallbackData.getEndTime());
+                        }
+                        break;
+                    case STATUS_MSG:
+                        NetworkCallbackData statusCallbackData = (NetworkCallbackData) msg.obj;
+                        if (networkCallbackData == null) {
+                            networkCallbackData = statusCallbackData ;
+                        } else {
+                            networkCallbackData.setStatus(statusCallbackData.getStatus());
+                        }
+                        break;
+                }
+
+                if (networkCallbackData.isComplete()) {
+                    DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                            new NetworkResponseData(networkCallbackData)
+                    );
+                }
+            }
+        };
     }
 
     protected void create(boolean isStreaming) throws IOException {
@@ -174,9 +214,12 @@ public class LanternSocketImpl extends SocketImpl {
     protected void close() throws IOException {
         Log.d("Socket connection time", (System.currentTimeMillis() - this.startTime) + "");
 
-        DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
-                new NetworkResponseData(this.startTime, System.currentTimeMillis(), this.name)
-        );
+        Message msg = new Message();
+        msg.what = CLOSE_MSG; // CLOSE 호출 메세지
+        msg.obj = new NetworkCallbackData(this.startTime, System.currentTimeMillis(), this.name);
+
+        // callback 등록
+        networkCallback.complete(msg);
 
         try {
             this.delegator.invoke(new Object[0]);
@@ -204,8 +247,8 @@ public class LanternSocketImpl extends SocketImpl {
                 throw (IOException)var3;
             }
         }
-        return stream;
-        //return new SocketMonitoringInputStream(stream);
+        //return stream;
+        return new SocketMonitoringInputStream(stream, networkCallback);
     }
 
     public Object getOption(int optID) throws SocketException {
