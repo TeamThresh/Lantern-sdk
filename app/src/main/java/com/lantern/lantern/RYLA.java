@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.lantern.lantern.dump.ActivityRenderData;
 import com.lantern.lantern.dump.DumpFileManager;
+import com.lantern.lantern.network.LanternSocketFactory;
 import com.lantern.lantern.util.Logger;
 
 import java.io.IOException;
@@ -141,11 +142,13 @@ public class RYLA {
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
             Logger.d("Lifecycle", "CREATED");
             // 호출 시간 dump
+            /*
+            // Deprecated
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.CREATED,
                             System.currentTimeMillis())
-            );
+            );*/
 
             activityList.add(activity);
             Logger.d("ACTIVITIES", "Add : "+activity.getClass().getSimpleName());
@@ -155,23 +158,27 @@ public class RYLA {
         public void onActivityStarted(Activity activity) {
             Logger.d("Lifecycle", "Started");
             //RYLA.getInstance().endRender("onStart");
-
+            /*
+            // Deprecated
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.STARTED,
                             System.currentTimeMillis())
-            );
+            );*/
         }
 
         @Override
         public void onActivityResumed(Activity activity) {
             Logger.d("Lifecycle", "Resumed");
             //RYLA.getInstance().endRender("onResume");
+
+            /*
+            // Deprecated
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.RESUMED,
                             System.currentTimeMillis())
-            );
+            );*/
             // 백그라운드에서 포그라운드로 넘어온 경우
             if (isAppForeground() && !RylaInstrumentation.getInstance().isResThreadAlive()) {
                 // Resource dump 재실행
@@ -181,11 +188,13 @@ public class RYLA {
 
         @Override
         public void onActivityPaused(Activity activity) {
+            /*
+            // Deprecated
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.PAUSED,
                             System.currentTimeMillis())
-            );
+            );*/
             // 포그라운드에서 백그라운드로 넘어가는 경우
             // TODO 이게 호출되는 시점은 항상 포그라운드 이기 때문에 소용 없음, 루프에서 체크
             if (!isAppForeground() && RylaInstrumentation.getInstance().isResThreadAlive()) {
@@ -196,11 +205,13 @@ public class RYLA {
 
         @Override
         public void onActivityStopped(Activity activity) {
+            /*
+            // Deprecated
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.STOPPED,
                             System.currentTimeMillis())
-            );
+            );*/
         }
 
         @Override
@@ -210,11 +221,13 @@ public class RYLA {
 
         @Override
         public void onActivityDestroyed(Activity activity) {
+            /*
+            // Deprecated
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
                     new ActivityRenderData(activity.getClass().getSimpleName(),
                             ActivityRenderData.DESTROYED,
                             System.currentTimeMillis())
-            );
+            );*/
 
             activityList.remove(activity);
             Logger.d("ACTIVITIES", "Delete : "+activity.getClass().getSimpleName());
@@ -270,5 +283,11 @@ public class RYLA {
         endTime = System.currentTimeMillis();
         Log.d("END Activity Time", "Activity Name: " + activityName + ", LFC Name: "+ lifecycleName + ", Time: "+endTime);
         // TODO Save Render time info
+        DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+            new ActivityRenderData(activityName,
+                    lifecycleName,
+                    startTime,
+                    endTime)
+        );
     }
 }
