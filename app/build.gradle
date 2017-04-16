@@ -1,10 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
 publish {
-    userOrg = 'lantern'
-    groupId = 'com.lantern.lantern'
-    artifactId = 'lantern-alpha'
-    publishVersion = '0.1.13'
+    userOrg = 'lantern-thresh'
+    groupId = 'com.lantern'
+    artifactId = 'lantern-sdk'
+    publishVersion = '0.1.1'
     desc = 'lantern mobile apm'
 }
 buildscript {
