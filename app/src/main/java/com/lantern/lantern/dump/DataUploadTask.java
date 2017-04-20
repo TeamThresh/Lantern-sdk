@@ -26,8 +26,10 @@ import java.net.URL;
 public class DataUploadTask extends AsyncTask<Void, Void, String> {
     private final String TAG = "DataUploadTask";
     private Context mContext;
-    private final static String SERVER_URL = "http://61.43.139.16:3000/api/upload";
+    //private final static String SERVER_URL = "http://45.32.8.52:3900/publish";
+    //private final static String SERVER_URL = "http://61.43.139.16:3000/api/upload";
     //private final static String SERVER_URL = "http://172.16.100.61:3000/api/upload";
+    private final static String SERVER_URL = "http://45.32.8.52:3000/api/upload";
     private HttpURLConnection conn;
 
     public DataUploadTask(Context context) {

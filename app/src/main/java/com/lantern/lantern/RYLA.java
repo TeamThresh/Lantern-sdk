@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.SSLSocket;
+
+import static android.os.Build.VERSION.SDK;
 
 /**
  * Created by YS on 2017-01-25.
@@ -261,14 +264,15 @@ public class RYLA {
 
     public void startNetworkTracing() {
         //URL.setURLStreamHandlerFactory(new LanternURLStreamHandlerFactory());
-
-        try {
-            // TODO 응답 시간 가져올것 (connect ~ close 까지)
-            LanternSocketFactory sf = new LanternSocketFactory();
-            Socket.setSocketImplFactory(sf);
-            SSLSocket.setSocketImplFactory(sf);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            try {
+                // TODO 응답 시간 가져올것 (connect ~ close 까지)
+                LanternSocketFactory sf = new LanternSocketFactory();
+                Socket.setSocketImplFactory(sf);
+                SSLSocket.setSocketImplFactory(sf);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
