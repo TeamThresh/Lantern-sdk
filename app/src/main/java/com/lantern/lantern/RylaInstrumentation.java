@@ -59,8 +59,8 @@ public class RylaInstrumentation extends Instrumentation {
         return rylaInstrumentation;
     }
 
-    public void excute() {
-        Logger.d("RylaInstrumentation", "excute");
+    public void execute() {
+        Logger.d("RylaInstrumentation", "execute");
         isResThreadAlive = true;
 
         // TODO 보낼때 파일을 마무리하지않는게 좋을것 같음

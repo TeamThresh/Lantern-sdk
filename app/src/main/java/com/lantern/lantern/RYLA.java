@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.net.ssl.SSLSocket;
 
@@ -92,7 +94,7 @@ public class RYLA {
     }
 
     public RYLA setActivityContext(Context context) {
-        activityName = ((Activity) context).getLocalClassName();
+        activityName = ((Activity) context).getClass().getSimpleName();
 
         return mRYLA;
     }
@@ -133,9 +135,24 @@ public class RYLA {
     // Res 덤프 시작
     public void startResDump() {
         Logger.d("RYLA", "startResDump()");
+
+        generateUUID();
+
         // Instrumentation 실행
         // Instrumentation 에서 CPU, Memory, Battery, 화면 클릭 가져옴
-        RylaInstrumentation.getInstance().excute();
+        RylaInstrumentation.getInstance().execute();
+    }
+
+    private void generateUUID() {
+        String uuid = getContext().getSharedPreferences("pref", Context.MODE_PRIVATE).getString("uuid", null);
+
+        if(uuid == null) {
+            uuid = UUID.randomUUID().toString();
+
+            SharedPreferences.Editor editor = getContext().getSharedPreferences("pref", Context.MODE_PRIVATE).edit();
+            editor.putString("uuid", uuid);
+            editor.commit();
+        }
     }
 
     // Declare Activity Lifecycle Callback

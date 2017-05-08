@@ -134,7 +134,7 @@ public class DumpFileManager {
             deviceInfo.put("device", Build.MODEL);
             deviceInfo.put("brand", Build.BRAND);
             // TODO 권한이 필요하므로 삭제
-            //deviceInfo.put("UUID", getDevicesUUID());
+            deviceInfo.put("UUID", getDevicesUUID());
 
             dumpData.put("device_info", deviceInfo);
             dumpData.put("data", dumpContents);
@@ -158,6 +158,7 @@ public class DumpFileManager {
     }
 
     private String getDevicesUUID(){
+        /*
         final TelephonyManager tm = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         final String tmDevice, tmSerial, androidId;
         tmDevice = "" + tm.getDeviceId();
@@ -167,6 +168,11 @@ public class DumpFileManager {
         String deviceId = deviceUuid.toString();
 
         return deviceId;
+        */
+
+        String uuid = mContext.getSharedPreferences("pref", Context.MODE_PRIVATE).getString("uuid", null);
+
+        return uuid;
     }
 
     //덤프 파일에 저장하기
