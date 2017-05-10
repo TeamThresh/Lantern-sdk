@@ -1,10 +1,16 @@
 package com.lantern.lantern.Resource;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,7 +24,7 @@ public class StatResource implements Resource {
     public StatResource() {
         // vmstat INFO
         // TODO 구형 폰에서 오래걸림
-        /*
+
         Process process;
         String cmd = "vmstat";
         int index = 0;
@@ -41,7 +47,7 @@ public class StatResource implements Resource {
             e.fillInStackTrace();
             Log.e("Process Manager", "Unable to execute "+cmd+" command");
         }
-        */
+
     }
 
     @Override

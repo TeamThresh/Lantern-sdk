@@ -92,7 +92,8 @@ public class DumpFileManager {
                     "\"os\":\""+Build.VERSION.RELEASE+"\","+
                     "\"app\":\""+getAppVersion()+"\","+
                     "\"device\":\""+Build.MODEL+"\","+
-                    "\"brand\":\""+Build.BRAND+"\"},"+
+                    "\"brand\":\""+Build.BRAND+"\","+
+                    "\"uuid\":\""+getDevicesUUID()+"\"},"+
                     "\"data\":[");
             isFirstData = true;
             pww.flush();
@@ -134,7 +135,7 @@ public class DumpFileManager {
             deviceInfo.put("device", Build.MODEL);
             deviceInfo.put("brand", Build.BRAND);
             // TODO 권한이 필요하므로 삭제
-            deviceInfo.put("UUID", getDevicesUUID());
+            deviceInfo.put("uuid", getDevicesUUID());
 
             dumpData.put("device_info", deviceInfo);
             dumpData.put("data", dumpContents);
