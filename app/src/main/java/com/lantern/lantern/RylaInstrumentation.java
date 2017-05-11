@@ -2,7 +2,11 @@ package com.lantern.lantern;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.BatteryManager;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -136,6 +140,7 @@ public class RylaInstrumentation extends Instrumentation {
                 }
                 //Dataset for dump file
                 Long dumpStartTime, dumpEndTime;
+                float battery;
                 NetworkResource networkInfo;
                 CPUResource cpuInfo;
                 CPUAppResource cpuAppInfo;
@@ -181,6 +186,9 @@ public class RylaInstrumentation extends Instrumentation {
                 vmstatInfo = new StatResource();
                 taskTime.put("vmstat_time", System.currentTimeMillis() - tempTime);
 
+                //battery
+                battery = getBatteryPercent();
+
                 // Logging
                 Logger.d("NETWORK INFO", networkInfo.toString());
                 memoryInfo.printMemoryInfo();
@@ -201,7 +209,8 @@ public class RylaInstrumentation extends Instrumentation {
                         activityStackList,
                         networkInfo,
                         stackTraceInfo,
-                        taskTime
+                        taskTime,
+                        battery
                 );
                 //save res dump file
                 DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(shallowDumpData);
@@ -212,6 +221,16 @@ public class RylaInstrumentation extends Instrumentation {
                 e.printStackTrace();
             }
         }
+    }
+
+    private float getBatteryPercent() {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = RYLA.getInstance().getContext().registerReceiver(null, ifilter);
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        return level / (float)scale;
     }
 
     public void startTouchTracing(Context mApplication) {

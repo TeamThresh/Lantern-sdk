@@ -1,5 +1,6 @@
 package com.lantern.lantern.Resource;
 
+import android.os.Build;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -27,6 +28,11 @@ public class StatResource implements Resource {
 
         Process process;
         String cmd = "vmstat";
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
+            return;
+        } else if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            cmd = "vmstat -n 1";
+        }
         int index = 0;
         try {
             process = Runtime.getRuntime().exec(cmd);

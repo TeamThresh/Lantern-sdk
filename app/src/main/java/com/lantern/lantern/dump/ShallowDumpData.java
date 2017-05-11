@@ -28,6 +28,7 @@ public class ShallowDumpData implements DumpData {
     private NetworkResource networkUsageInfo;
     private ThreadTrace stackTraceinfo;
     private HashMap<String, Long> taskTime;
+    private float batteryPercent;
 
     public ShallowDumpData() {
 
@@ -37,7 +38,7 @@ public class ShallowDumpData implements DumpData {
                             CPUAppResource cpuAppInfo, StatResource vmstatInfo,
                             MemoryResource memoryInfo, ActivityStack activityStackInfo,
                             NetworkResource networkUsageInfo, ThreadTrace stackTraceinfo,
-                            HashMap<String, Long> taskTime) {
+                            HashMap<String, Long> taskTime, float batteryPercent) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.cpuInfo = cpuInfo;
@@ -48,6 +49,7 @@ public class ShallowDumpData implements DumpData {
         this.networkUsageInfo = networkUsageInfo;
         this.stackTraceinfo = stackTraceinfo;
         this.taskTime = taskTime;
+        this.batteryPercent = batteryPercent;
     }
 
 
@@ -124,6 +126,12 @@ public class ShallowDumpData implements DumpData {
         this.stackTraceinfo = stackTraceinfo;
     }
 
+    public float getBatteryPercent() { return batteryPercent; }
+
+    public void setBatteryPercent(float batteryPercent) {
+        this.batteryPercent = batteryPercent;
+    }
+
     @Override
     //type이 res인 dump JSON object 생성하기
     public JSONObject getDumpData() {
@@ -172,6 +180,7 @@ public class ShallowDumpData implements DumpData {
             //battery
             // TODO 권한 필요
             //osData.put("battery", 10);
+            osData.put("battery", getBatteryPercent());
 
             //network_usage
             osData.put("network_usage", getNetworkUsageInfo().toJson());
