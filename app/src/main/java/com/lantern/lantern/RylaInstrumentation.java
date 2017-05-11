@@ -230,7 +230,7 @@ public class RylaInstrumentation extends Instrumentation {
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        return level / (float)scale;
+        return level / (float)scale * 100;
     }
 
     public void startTouchTracing(Context mApplication) {
