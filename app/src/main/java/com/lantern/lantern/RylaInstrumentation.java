@@ -22,6 +22,7 @@ import com.lantern.lantern.Resource.ThreadTrace;
 import com.lantern.lantern.dump.DataUploadTask;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.ShallowDumpData;
+import com.lantern.lantern.eventpath.EventPathManager;
 import com.lantern.lantern.util.Logger;
 
 import java.util.HashMap;
@@ -249,4 +250,13 @@ public class RylaInstrumentation extends Instrumentation {
             return false;
         }
     };
+
+    public static void markEventPath() {
+        EventPathManager.getInstance(RYLA.getInstance().getContext()).createEventPathItem(2, "");
+    }
+
+    public static void markEventPath(String label) {
+        Log.d("EventPath", "mark event path");
+        EventPathManager.getInstance(RYLA.getInstance().getContext()).createEventPathItem(2, label);
+    }
 }
