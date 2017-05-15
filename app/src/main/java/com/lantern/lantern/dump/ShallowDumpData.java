@@ -29,6 +29,7 @@ public class ShallowDumpData implements DumpData {
     private ThreadTrace stackTraceinfo;
     private HashMap<String, Long> taskTime;
     private float batteryPercent;
+    private SystemServiceData systemServiceData;
 
     public ShallowDumpData() {
 
@@ -38,7 +39,7 @@ public class ShallowDumpData implements DumpData {
                             CPUAppResource cpuAppInfo, StatResource vmstatInfo,
                             MemoryResource memoryInfo, ActivityStack activityStackInfo,
                             NetworkResource networkUsageInfo, ThreadTrace stackTraceinfo,
-                            HashMap<String, Long> taskTime, float batteryPercent) {
+                            HashMap<String, Long> taskTime, float batteryPercent, SystemServiceData systemServiceData) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.cpuInfo = cpuInfo;
@@ -50,6 +51,7 @@ public class ShallowDumpData implements DumpData {
         this.stackTraceinfo = stackTraceinfo;
         this.taskTime = taskTime;
         this.batteryPercent = batteryPercent;
+        this.systemServiceData = systemServiceData;
     }
 
 
@@ -132,6 +134,14 @@ public class ShallowDumpData implements DumpData {
         this.batteryPercent = batteryPercent;
     }
 
+    public SystemServiceData getSystemServiceData() {
+        return systemServiceData;
+    }
+
+    public void setSystemServiceData(SystemServiceData systemServiceData) {
+        this.systemServiceData = systemServiceData;
+    }
+
     @Override
     //type이 res인 dump JSON object 생성하기
     public JSONObject getDumpData() {
@@ -159,6 +169,8 @@ public class ShallowDumpData implements DumpData {
 
             // parse app data
             resData.put("app", getParsedAppData());
+
+            resData.put("system_service", getSystemServiceData().getDumpData());
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -215,4 +227,6 @@ public class ShallowDumpData implements DumpData {
         return appData;
 
     }
+
+
 }

@@ -1,8 +1,13 @@
 package com.lantern.lantern.dump;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
 import android.util.Log;
 
 import com.lantern.lantern.RYLA;
+import com.lantern.lantern.Resource.ThreadTrace;
 import com.lantern.lantern.eventpath.EventPathItem;
 import com.lantern.lantern.eventpath.EventPathManager;
 
@@ -41,6 +46,7 @@ public class CrashDumpData implements DumpData {
         JSONObject crashData = new JSONObject();
         JSONArray stacktraceData = new JSONArray();
         JSONArray eventPathData = new JSONArray();
+        JSONObject systemServiceData = new JSONObject();
 
         try {
             //type
@@ -59,6 +65,8 @@ public class CrashDumpData implements DumpData {
                 crashData.put("stacktrace", stackTraceRaw);
             }
 
+            crashData.put("system_service", new SystemServiceData().getDumpData());
+
             List<EventPathItem> eventPath = EventPathManager.getInstance(RYLA.getInstance().getContext()).getEventPathList();
 
             Log.d("crash dump data", "event path num : " + eventPath.size());
@@ -76,10 +84,16 @@ public class CrashDumpData implements DumpData {
 
                 crashData.put("event_path", eventPathData);
             }
+
+            ThreadTrace threadTrace = new ThreadTrace();
+
+            crashData.put("thread_trace", threadTrace.toJsonArray());
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return crashData;
     }
+
 }

@@ -22,6 +22,7 @@ import com.lantern.lantern.Resource.ThreadTrace;
 import com.lantern.lantern.dump.DataUploadTask;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.ShallowDumpData;
+import com.lantern.lantern.dump.SystemServiceData;
 import com.lantern.lantern.eventpath.EventPathManager;
 import com.lantern.lantern.util.Logger;
 
@@ -149,6 +150,7 @@ public class RylaInstrumentation extends Instrumentation {
                 StatResource vmstatInfo;
                 ActivityStack activityStackList;
                 ThreadTrace stackTraceInfo;
+                SystemServiceData systemServiceData;
 
                 // 각각 걸리는 시간 계산
                 long tempTime = 0;
@@ -197,6 +199,9 @@ public class RylaInstrumentation extends Instrumentation {
                 Logger.d("CPU APP INFO", cpuAppInfo.toString());
                 Logger.d("VMSTAT INFO", vmstatInfo.toString());
 
+                systemServiceData = new SystemServiceData();
+
+
                 // 종료시간
                 dumpEndTime = System.currentTimeMillis();
                 Logger.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
@@ -211,7 +216,8 @@ public class RylaInstrumentation extends Instrumentation {
                         networkInfo,
                         stackTraceInfo,
                         taskTime,
-                        battery
+                        battery,
+                        systemServiceData
                 );
                 //save res dump file
                 DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(shallowDumpData);
