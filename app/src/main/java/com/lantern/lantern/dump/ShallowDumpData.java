@@ -144,14 +144,20 @@ public class ShallowDumpData implements DumpData {
 
     @Override
     //type이 res인 dump JSON object 생성하기
+    //crash dump data에서도 사용됨
     public JSONObject getDumpData() {
+        return getDumpData(false);
+    }
+
+    public JSONObject getDumpData(boolean forCrash) {
         JSONObject resData = new JSONObject();
         JSONObject durationData = new JSONObject();
         JSONObject timeData = new JSONObject();
 
         try {
             //type
-            resData.put("type", "res");
+            if(!forCrash)
+                resData.put("type", "res");
 
             //duration_time
             durationData.put("start", getStartTime());

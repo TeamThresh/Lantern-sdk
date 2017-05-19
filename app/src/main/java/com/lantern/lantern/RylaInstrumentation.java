@@ -140,85 +140,9 @@ public class RylaInstrumentation extends Instrumentation {
                 } else {
                     dumpCount++;
                 }
-                //Dataset for dump file
-                Long dumpStartTime, dumpEndTime;
-                float battery;
-                NetworkResource networkInfo;
-                CPUResource cpuInfo;
-                CPUAppResource cpuAppInfo;
-                MemoryResource memoryInfo;
-                StatResource vmstatInfo;
-                ActivityStack activityStackList;
-                ThreadTrace stackTraceInfo;
-                SystemServiceData systemServiceData;
 
-                // 각각 걸리는 시간 계산
-                long tempTime = 0;
-                HashMap<String, Long> taskTime = new HashMap<>();
+                shallowDumpData = getShallowDump(shallowDumpData);
 
-                // 시작시간
-                dumpStartTime = System.currentTimeMillis();
-                Logger.d("DUMP TIME", "====== "+ dumpStartTime +" =======");
-
-                // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
-                tempTime = System.currentTimeMillis();
-                stackTraceInfo = new ThreadTrace();
-                taskTime.put("thread_dump_time", System.currentTimeMillis() - tempTime);
-
-                activityStackList = new ActivityStack();
-
-                // NETWORK USAGE INFO
-                networkInfo = new NetworkResource();
-
-                // MEMORY INFO
-                tempTime = System.currentTimeMillis();
-                memoryInfo = new MemoryResource();
-                taskTime.put("memory_time", System.currentTimeMillis() - tempTime);
-
-                // CPU INFO
-                // top 방식 아닌 직접 가져오는 방식 사용
-                tempTime = System.currentTimeMillis();
-                cpuInfo = new CPUResource();
-                taskTime.put("proc_stat_time", System.currentTimeMillis() - tempTime);
-                tempTime = System.currentTimeMillis();
-                cpuAppInfo = new CPUAppResource();
-                taskTime.put("proc_pid_time", System.currentTimeMillis() - tempTime);
-
-                // vmstat INFO
-                tempTime = System.currentTimeMillis();
-                vmstatInfo = new StatResource();
-                taskTime.put("vmstat_time", System.currentTimeMillis() - tempTime);
-
-                //battery
-                battery = getBatteryPercent();
-
-                // Logging
-                Logger.d("NETWORK INFO", networkInfo.toString());
-                memoryInfo.printMemoryInfo();
-                Logger.d("CPU INFO", cpuInfo.toString());
-                Logger.d("CPU APP INFO", cpuAppInfo.toString());
-                Logger.d("VMSTAT INFO", vmstatInfo.toString());
-
-                systemServiceData = new SystemServiceData();
-
-
-                // 종료시간
-                dumpEndTime = System.currentTimeMillis();
-                Logger.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
-                shallowDumpData.setDumpData(
-                        dumpStartTime,
-                        dumpEndTime,
-                        cpuInfo,
-                        cpuAppInfo,
-                        vmstatInfo,
-                        memoryInfo,
-                        activityStackList,
-                        networkInfo,
-                        stackTraceInfo,
-                        taskTime,
-                        battery,
-                        systemServiceData
-                );
                 //save res dump file
                 DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(shallowDumpData);
             }
@@ -246,6 +170,90 @@ public class RylaInstrumentation extends Instrumentation {
 
     public void stopTouchTracing() {
 
+    }
+
+    public ShallowDumpData getShallowDump(ShallowDumpData shallowDumpData) {
+        //Dataset for dump file
+        Long dumpStartTime, dumpEndTime;
+        float battery;
+        NetworkResource networkInfo;
+        CPUResource cpuInfo;
+        CPUAppResource cpuAppInfo;
+        MemoryResource memoryInfo;
+        StatResource vmstatInfo;
+        ActivityStack activityStackList;
+        ThreadTrace stackTraceInfo;
+        SystemServiceData systemServiceData;
+
+        // 각각 걸리는 시간 계산
+        long tempTime = 0;
+        HashMap<String, Long> taskTime = new HashMap<>();
+
+        // 시작시간
+        dumpStartTime = System.currentTimeMillis();
+        Logger.d("DUMP TIME", "====== "+ dumpStartTime +" =======");
+
+        // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
+        tempTime = System.currentTimeMillis();
+        stackTraceInfo = new ThreadTrace();
+        taskTime.put("thread_dump_time", System.currentTimeMillis() - tempTime);
+
+        activityStackList = new ActivityStack();
+
+        // NETWORK USAGE INFO
+        networkInfo = new NetworkResource();
+
+        // MEMORY INFO
+        tempTime = System.currentTimeMillis();
+        memoryInfo = new MemoryResource();
+        taskTime.put("memory_time", System.currentTimeMillis() - tempTime);
+
+        // CPU INFO
+        // top 방식 아닌 직접 가져오는 방식 사용
+        tempTime = System.currentTimeMillis();
+        cpuInfo = new CPUResource();
+        taskTime.put("proc_stat_time", System.currentTimeMillis() - tempTime);
+        tempTime = System.currentTimeMillis();
+        cpuAppInfo = new CPUAppResource();
+        taskTime.put("proc_pid_time", System.currentTimeMillis() - tempTime);
+
+        // vmstat INFO
+        tempTime = System.currentTimeMillis();
+        vmstatInfo = new StatResource();
+        taskTime.put("vmstat_time", System.currentTimeMillis() - tempTime);
+
+        //battery
+        battery = getBatteryPercent();
+
+        // Logging
+        Logger.d("NETWORK INFO", networkInfo.toString());
+        memoryInfo.printMemoryInfo();
+        Logger.d("CPU INFO", cpuInfo.toString());
+        Logger.d("CPU APP INFO", cpuAppInfo.toString());
+        Logger.d("VMSTAT INFO", vmstatInfo.toString());
+
+        systemServiceData = new SystemServiceData();
+
+
+        // 종료시간
+        dumpEndTime = System.currentTimeMillis();
+        Logger.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
+        shallowDumpData.setDumpData(
+                dumpStartTime,
+                dumpEndTime,
+                cpuInfo,
+                cpuAppInfo,
+                vmstatInfo,
+                memoryInfo,
+                activityStackList,
+                networkInfo,
+                stackTraceInfo,
+                taskTime,
+                battery,
+                systemServiceData
+        );
+
+        return shallowDumpData;
     }
 
     private View.OnTouchListener touchListener = new View.OnTouchListener() {

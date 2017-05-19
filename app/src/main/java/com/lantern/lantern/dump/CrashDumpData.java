@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.lantern.lantern.RYLA;
 import com.lantern.lantern.Resource.ThreadTrace;
+import com.lantern.lantern.RylaInstrumentation;
 import com.lantern.lantern.eventpath.EventPathItem;
 import com.lantern.lantern.eventpath.EventPathManager;
 
@@ -65,7 +66,7 @@ public class CrashDumpData implements DumpData {
                 crashData.put("stacktrace", stackTraceRaw);
             }
 
-            crashData.put("system_service", new SystemServiceData().getDumpData());
+            //crashData.put("system_service", new SystemServiceData().getDumpData());
 
             List<EventPathItem> eventPath = EventPathManager.getInstance(RYLA.getInstance().getContext()).getEventPathList();
 
@@ -85,9 +86,15 @@ public class CrashDumpData implements DumpData {
                 crashData.put("event_path", eventPathData);
             }
 
+            crashData.put("res_data", RylaInstrumentation.getInstance().getShallowDump(new ShallowDumpData()));
+
+            /*
             ThreadTrace threadTrace = new ThreadTrace();
 
             crashData.put("thread_trace", threadTrace.toJsonArray());
+            */
+
+
 
         } catch (JSONException e) {
             e.printStackTrace();
