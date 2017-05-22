@@ -3,6 +3,7 @@ package com.lantern.lantern.dump;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -127,8 +128,8 @@ public class DumpFileManager {
         try {
             dumpData.put("launch_time", System.currentTimeMillis());
             dumpData.put("dump_interval", mContext.getSharedPreferences("pref", MODE_PRIVATE).getInt("dump_term", 1000));
+            dumpData.put("projectKey", getProjectKey());
             dumpData.put("package_name", mContext.getPackageName());
-
 
             deviceInfo.put("os", Build.VERSION.RELEASE);
             deviceInfo.put("app", getAppVersion());
@@ -174,6 +175,10 @@ public class DumpFileManager {
         String uuid = mContext.getSharedPreferences("pref", Context.MODE_PRIVATE).getString("uuid", null);
 
         return uuid;
+    }
+
+    private String getProjectKey() {
+        return mContext.getSharedPreferences("pref", Context.MODE_PRIVATE).getString("projectKey", null);
     }
 
     //덤프 파일에 저장하기

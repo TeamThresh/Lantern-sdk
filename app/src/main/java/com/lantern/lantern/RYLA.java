@@ -63,9 +63,12 @@ public class RYLA {
     }
 
     // 실행전 Context 설정
-    public RYLA setContext(Application application) {
+    public RYLA setContext(String projectKey, Application application) {
         Logger.d("RYLA", "setContext 실행");
         mApplication = application;
+
+        generateUUID();
+        saveProjectKey(projectKey);
 
         // 스크린 OnOff 등록
         installScreenOffListner();
@@ -136,8 +139,6 @@ public class RYLA {
     public void startResDump() {
         Logger.d("RYLA", "startResDump()");
 
-        generateUUID();
-
         // Instrumentation 실행
         // Instrumentation 에서 CPU, Memory, Battery, 화면 클릭 가져옴
         RylaInstrumentation.getInstance().execute();
@@ -151,7 +152,17 @@ public class RYLA {
 
             SharedPreferences.Editor editor = getContext().getSharedPreferences("pref", Context.MODE_PRIVATE).edit();
             editor.putString("uuid", uuid);
-            editor.commit();
+            editor.apply();
+        }
+    }
+
+    private void saveProjectKey(String projectKey) {
+        String savedProjectKey = getContext().getSharedPreferences("pref", Context.MODE_PRIVATE).getString("projectKey", null);
+
+        if(savedProjectKey == null) {
+            SharedPreferences.Editor editor = getContext().getSharedPreferences("pref", Context.MODE_PRIVATE).edit();
+            editor.putString("projectKey", projectKey);
+            editor.apply();
         }
     }
 

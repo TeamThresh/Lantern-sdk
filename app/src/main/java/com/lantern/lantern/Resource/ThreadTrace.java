@@ -66,8 +66,13 @@ public class ThreadTrace {
                 JSONObject tempObj = new JSONObject();
                 JSONArray stackTraceData = new JSONArray();
                 tempObj.put("thread_name", key);
+
+                int traceDepth =0;
                 for(StackTraceElement element : allThreads.get(key)) {
-                    stackTraceData.put(element);
+                    JSONObject stackTraceLine = new JSONObject();
+                    stackTraceLine.put("trace_depth", traceDepth++);
+                    stackTraceLine.put("trace_content", element);
+                    stackTraceData.put(stackTraceLine);
                 }
                 tempObj.put("trace_list", stackTraceData);
                 threadList.put(tempObj);
