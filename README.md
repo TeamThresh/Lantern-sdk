@@ -29,7 +29,7 @@
     @Override
     public void onCreate() {
       super.onCreate();
-      com.lantern.lantern.RYLA.getInstance("PROJECT_KEY").setContext(this).startResDump();
+      com.lantern.lantern.RYLA.getInstance().setContext("PROJECT_KEY", this).startResDump();
       ...
     }
     ...
