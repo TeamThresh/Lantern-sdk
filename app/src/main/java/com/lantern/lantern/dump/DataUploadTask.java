@@ -8,6 +8,7 @@ import com.lantern.lantern.RYLA;
 import com.lantern.lantern.util.Logger;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by yky on 2017. 2. 13..
@@ -59,19 +61,27 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
                 conn.setReadTimeout(1000 * 60 * 60);
                 conn.setRequestProperty("Cache-Control", "no-cache");
                 conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Content-Encoding", "gzip");
                 conn.setRequestProperty("Accept", "application/json");
 
                 // 데이터
                 // 전송
                 OutputStream os = conn.getOutputStream();
+
+                // GZIP Compressing
+                BufferedOutputStream out =
+                        new BufferedOutputStream(
+                                new GZIPOutputStream(os));
+
+                // Send Dump Data
                 BufferedInputStream is = new BufferedInputStream(DumpFileManager.getInstance(RYLA.getInstance().getContext()).readDumpStream(file));
                 byte[] buffer = new byte[1024]; // Adjust if you want
                 int bytesRead;
                 while ((bytesRead = is.read(buffer)) != -1) {
-                    os.write(buffer, 0, bytesRead);
+                    out.write(buffer, 0, bytesRead);
                 }
                 String footer = "]}";
-                os.write(footer.getBytes(), 0, footer.length());
+                out.write(footer.getBytes(), 0, footer.length());
 
                 os.flush();
                 is.close();
