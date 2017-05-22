@@ -65,6 +65,7 @@ public class DumpFileManager {
             dumpData.put("launch_time", System.currentTimeMillis());
             dumpData.put("dump_interval", mContext.getSharedPreferences("pref", MODE_PRIVATE).getInt("dump_term", 1000));
             dumpData.put("package_name", mContext.getPackageName());
+            dumpData.put("project_key", mContext.getSharedPreferences("pref", MODE_PRIVATE).getString("project_key", ""));
 
 
             deviceInfo.put("os", Build.VERSION.RELEASE);

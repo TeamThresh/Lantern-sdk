@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.SSLSocket;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by YS on 2017-01-25.
@@ -56,9 +59,15 @@ public class RYLA {
     }
 
     // 실행전 Context 설정
-    public RYLA setContext(Application application) {
+    public RYLA setContext(String key, Application application) {
         Log.d("RYLA", "setContext 실행");
         mApplication = application;
+
+        // Key setting
+        SharedPreferences pref = RYLA.getInstance().getContext().getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("project_key", key);
+        editor.apply();
 
         // 디바이스 정보
         DeviceInfo.printDeviceInfo();
