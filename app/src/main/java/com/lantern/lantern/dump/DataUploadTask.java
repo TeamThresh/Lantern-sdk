@@ -83,9 +83,9 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
                 String footer = "]}";
                 out.write(footer.getBytes(), 0, footer.length());
 
-                os.flush();
+                out.flush();
                 is.close();
-                os.close();
+                out.close();
 
 
                 // 파일 전송을 완료한 경우 파일제거
