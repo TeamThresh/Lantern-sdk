@@ -3,9 +3,7 @@ package com.lantern.lantern.dump;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
 import android.os.Build;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.lantern.lantern.util.Logger;
@@ -26,7 +24,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.UUID;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -89,6 +86,7 @@ public class DumpFileManager {
             pww.write("{\"launch_time\":\""+System.currentTimeMillis()+"\","+
                     "\"dump_interval\":\""+mContext.getSharedPreferences("pref", MODE_PRIVATE).getInt("dump_term", 1000)+"\","+
                     "\"package_name\":\""+mContext.getPackageName()+"\","+
+                    "\"project_key\":\""+mContext.getSharedPreferences("pref", MODE_PRIVATE).getString("projectKey", "")+"\"," +
                     "\"device_info\":{"+
                     "\"os\":\""+Build.VERSION.RELEASE+"\","+
                     "\"app\":\""+getAppVersion()+"\","+
