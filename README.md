@@ -20,6 +20,7 @@
 
 2. Create your own application file (ex. MyApplication.java)
 3. Add Lantern API to execute on your Application class
+  ( Insert "PROJECT_KEY" in here )
 
   ```
   public class MyApplication extends Application {
@@ -28,7 +29,7 @@
     @Override
     public void onCreate() {
       super.onCreate();
-      com.lantern.lantern.RYLA.getInstance().setContext(this).startResDump();
+      com.lantern.lantern.RYLA.getInstance("PROJECT_KEY").setContext(this).startResDump();
       ...
     }
     ...
