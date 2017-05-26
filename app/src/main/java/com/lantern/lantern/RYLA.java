@@ -25,8 +25,6 @@ import java.util.UUID;
 
 import javax.net.ssl.SSLSocket;
 
-import static android.os.Build.VERSION.SDK;
-
 /**
  * Created by YS on 2017-01-25.
  */
@@ -157,9 +155,9 @@ public class RYLA {
     }
 
     private void saveProjectKey(String projectKey) {
-        String savedProjectKey = getContext().getSharedPreferences("pref", Context.MODE_PRIVATE).getString("projectKey", null);
+        String savedProjectKey = getContext().getSharedPreferences("pref", Context.MODE_PRIVATE).getString("projectKey", "");
 
-        if(savedProjectKey == null) {
+        if(!projectKey.equals(savedProjectKey)) {
             SharedPreferences.Editor editor = getContext().getSharedPreferences("pref", Context.MODE_PRIVATE).edit();
             editor.putString("projectKey", projectKey);
             editor.apply();
