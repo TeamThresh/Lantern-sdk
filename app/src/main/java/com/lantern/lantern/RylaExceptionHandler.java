@@ -33,9 +33,14 @@ public class RylaExceptionHandler implements Thread.UncaughtExceptionHandler {
 
         Logger.d("CRASH", stacktrace.toString());
         Log.d("CRASH", stacktrace.toString());
+
+        CrashDumpData crashDumpData = new CrashDumpData(stacktrace.toString());
+        Log.d("crash data", crashDumpData.getDumpData().toString());
         DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
-                new CrashDumpData(stacktrace.toString())
+                crashDumpData
         );
+
+
         this.defaultExceptionHandler.uncaughtException(t, e);
     }
 }

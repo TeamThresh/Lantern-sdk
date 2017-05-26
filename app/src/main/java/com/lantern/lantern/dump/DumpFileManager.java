@@ -89,6 +89,7 @@ public class DumpFileManager {
             pww.write("{\"launch_time\":\""+System.currentTimeMillis()+"\","+
                     "\"dump_interval\":\""+mContext.getSharedPreferences("pref", MODE_PRIVATE).getInt("dump_term", 1000)+"\","+
                     "\"package_name\":\""+mContext.getPackageName()+"\","+
+                    "\"project_key\":\""+getProjectKey()+"\","+
                     "\"device_info\":{"+
                     "\"os\":\""+Build.VERSION.RELEASE+"\","+
                     "\"app\":\""+getAppVersion()+"\","+
@@ -128,8 +129,8 @@ public class DumpFileManager {
         try {
             dumpData.put("launch_time", System.currentTimeMillis());
             dumpData.put("dump_interval", mContext.getSharedPreferences("pref", MODE_PRIVATE).getInt("dump_term", 1000));
-            dumpData.put("projectKey", getProjectKey());
             dumpData.put("package_name", mContext.getPackageName());
+            dumpData.put("project_key", getProjectKey());
 
             deviceInfo.put("os", Build.VERSION.RELEASE);
             deviceInfo.put("app", getAppVersion());

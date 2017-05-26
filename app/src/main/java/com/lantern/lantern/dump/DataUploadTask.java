@@ -31,7 +31,8 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
     //private final static String SERVER_URL = "http://45.32.8.52:3900/publish";
     //private final static String SERVER_URL = "http://61.43.139.16:3000/api/upload";
     //private final static String SERVER_URL = "http://172.16.100.61:3000/api/upload";
-    private final static String SERVER_URL = "http://45.32.8.52:3000/api/upload";
+    //private final static String SERVER_URL = "http://45.32.8.52:3000/api/upload";
+    private final static String SERVER_URL = "http://lantern.thresh.io/api/upload";
     private HttpURLConnection conn;
 
     public DataUploadTask(Context context) {
@@ -83,9 +84,9 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
                 String footer = "]}";
                 out.write(footer.getBytes(), 0, footer.length());
 
-                os.flush();
+                out.flush();
                 is.close();
-                os.close();
+                out.close();
 
 
                 // 파일 전송을 완료한 경우 파일제거

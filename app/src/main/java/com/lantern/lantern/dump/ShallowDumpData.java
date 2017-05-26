@@ -30,9 +30,14 @@ public class ShallowDumpData implements DumpData {
     private HashMap<String, Long> taskTime;
     private float batteryPercent;
     private SystemServiceData systemServiceData;
+    private boolean forCrash;
 
     public ShallowDumpData() {
+        this.forCrash = false;
+    }
 
+    public ShallowDumpData(boolean forCrash) {
+        this.forCrash = forCrash;
     }
 
     public void setDumpData(Long startTime, Long endTime, CPUResource cpuInfo,
@@ -145,18 +150,15 @@ public class ShallowDumpData implements DumpData {
     @Override
     //type이 res인 dump JSON object 생성하기
     //crash dump data에서도 사용됨
-    public JSONObject getDumpData() {
-        return getDumpData(false);
-    }
 
-    public JSONObject getDumpData(boolean forCrash) {
+    public JSONObject getDumpData() {
         JSONObject resData = new JSONObject();
         JSONObject durationData = new JSONObject();
         JSONObject timeData = new JSONObject();
 
         try {
             //type
-            if(!forCrash)
+            if(!this.forCrash)
                 resData.put("type", "res");
 
             //duration_time

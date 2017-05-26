@@ -47,7 +47,6 @@ public class CrashDumpData implements DumpData {
         JSONObject crashData = new JSONObject();
         JSONArray stacktraceData = new JSONArray();
         JSONArray eventPathData = new JSONArray();
-        JSONObject systemServiceData = new JSONObject();
 
         try {
             //type
@@ -86,7 +85,7 @@ public class CrashDumpData implements DumpData {
                 crashData.put("event_path", eventPathData);
             }
 
-            crashData.put("res_data", RylaInstrumentation.getInstance().getShallowDump(new ShallowDumpData()));
+            crashData.put("res_data", RylaInstrumentation.getInstance().getShallowDump(new ShallowDumpData(true)).getDumpData());
 
             /*
             ThreadTrace threadTrace = new ThreadTrace();
