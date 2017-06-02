@@ -5,10 +5,12 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
+
 import android.os.Bundle;
 import android.util.Log;
 
@@ -24,6 +26,8 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.net.ssl.SSLSocket;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by YS on 2017-01-25.
@@ -70,6 +74,7 @@ public class RYLA {
 
         // 스크린 OnOff 등록
         installScreenOffListner();
+
 
         // 디바이스 정보
         DeviceInfo.printDeviceInfo();
