@@ -1,26 +1,32 @@
 package com.lantern.lantern;
 
-import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.BatteryManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.lantern.lantern.Resource.ActivityStack;
 import com.lantern.lantern.Resource.CPUAppResource;
 import com.lantern.lantern.Resource.CPUResource;
 import com.lantern.lantern.Resource.MemoryResource;
 import com.lantern.lantern.Resource.NetworkResource;
 import com.lantern.lantern.Resource.StatResource;
+import com.lantern.lantern.Resource.ThreadTrace;
 import com.lantern.lantern.dump.DataUploadTask;
 import com.lantern.lantern.dump.DumpFileManager;
 import com.lantern.lantern.dump.ShallowDumpData;
+import com.lantern.lantern.dump.SystemServiceData;
+import com.lantern.lantern.eventpath.EventPathManager;
+import com.lantern.lantern.util.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.lantern.lantern.RYLA.isAppForeground;
@@ -37,13 +43,12 @@ public class RylaInstrumentation extends Instrumentation {
     // linear layout will use to detect touch event
     private LinearLayout touchLayout;
 
-    static List<Long> usages1 = new ArrayList<>();
-
     private static int dumpTerm;
+    private static int dumpCount = 0;
 
     public RylaInstrumentation() {
         SharedPreferences pref = RYLA.getInstance().getContext().getSharedPreferences("pref", MODE_PRIVATE);
-        dumpTerm = pref.getInt("dump_term", 10000);
+        dumpTerm = pref.getInt("dump_term", 1000);
     }
 
     // Instrumentation 초기화 실행
@@ -53,18 +58,22 @@ public class RylaInstrumentation extends Instrumentation {
     private boolean isResThreadAlive = false;
 
     public static RylaInstrumentation getInstance() {
-        Log.d("RylaInstrumentation", "getInstance");
+        Logger.d("RylaInstrumentation", "getInstance");
         if (rylaInstrumentation == null) {
             rylaInstrumentation = new RylaInstrumentation();
         }
         return rylaInstrumentation;
     }
 
-    public void excute() {
-        Log.d("RylaInstrumentation", "excute");
+    public void execute() {
+        Logger.d("RylaInstrumentation", "execute");
         isResThreadAlive = true;
 
+        // TODO 보낼때 파일을 마무리하지않는게 좋을것 같음
+        // TODO 아니면 저장 형태를 바꿀것
         new DataUploadTask(RYLA.getInstance().getContext()).execute();
+        DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+        dumpCount = 0;
 
         if (rylaInstrumentation != null) {
             rylaInstrumentation.start();
@@ -86,12 +95,18 @@ public class RylaInstrumentation extends Instrumentation {
         return isResThreadAlive;
     }
 
+    // TODO RYLA 로 옮겨서 alive가 끝나면 instrumentation을 종료하고 새로 시작
     public void setResThreadAlive(boolean isAlive) {
         isResThreadAlive = isAlive;
 
         // 터치
         if (isAlive) {
+            // TODO 보낼때 파일을 마무리하지않는게 좋을것 같음
+            // TODO 아니면 저장 형태를 바꿀것
             new DataUploadTask(RYLA.getInstance().getContext()).execute();
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+
+            dumpCount = 0;
             startTouchTracing(RYLA.getInstance().getContext());
         } else {
             stopTouchTracing();
@@ -102,11 +117,13 @@ public class RylaInstrumentation extends Instrumentation {
     public void onDestroy() {
         super.onDestroy();
 
-        Log.d("eunchan", "MyInstrumentation::onDestory() : I'm being destroeyd!!! O.M.G.");
+        Logger.d("eunchan", "MyInstrumentation::onDestory() : I'm being destroeyd!!! O.M.G.");
     }
 
     @Override
     public void onStart() {
+        //WeakReference<ShallowDumpData> shallowDumpData = new WeakReference<>(new ShallowDumpData());
+        ShallowDumpData shallowDumpData = new ShallowDumpData();
         while (true) {
             if (isResThreadAlive) {
                 if (!isAppForeground()) {
@@ -115,67 +132,19 @@ public class RylaInstrumentation extends Instrumentation {
                     continue;
                 }
 
-                //Dataset for dump file
-                Long dumpStartTime, dumpEndTime;
-                NetworkResource networkInfo;
-                CPUResource cpuInfo;
-                CPUAppResource cpuAppInfo;
-                MemoryResource memoryInfo;
-                StatResource vmstatInfo;
-                List<String> activityStackList = new ArrayList<>();
-                List<String> stackTraceInfo;
-
-                // 시작시간
-                dumpStartTime = System.currentTimeMillis();
-                Log.d("DUMP TIME", "====== "+ dumpStartTime +" =======");
-
-                // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
-                stackTraceInfo = RYLA.getInstance().getThreadTracing();
-
-                for (Activity activity : RYLA.getInstance().getActivityList()) {
-                    Log.d("ACTIVITIES", activity.getClass().getSimpleName());
-                    activityStackList.add(activity.getClass().getSimpleName());
+                if (dumpCount > 300) {  // 5분동안 실행
+                    // 파일 재생성
+                    DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+                    // 카운트 초기화
+                    dumpCount = 0;
+                } else {
+                    dumpCount++;
                 }
 
-                // NETWORK USAGE INFO
-                networkInfo = new NetworkResource();
-
-                // MEMORY INFO
-                memoryInfo = new MemoryResource();
-
-                // CPU INFO
-                // top 방식 아닌 직접 가져오는 방식 사용
-                cpuInfo = new CPUResource();
-                cpuAppInfo = new CPUAppResource();
-
-                // vmstat INFO
-                vmstatInfo = new StatResource();
-
-                // Logging
-                Log.d("NETWORK INFO", networkInfo.toString());
-                memoryInfo.printMemoryInfo();
-                Log.d("CPU INFO", cpuInfo.toString());
-                Log.d("CPU APP INFO", cpuAppInfo.toString());
-                Log.d("VMSTAT INFO", vmstatInfo.toString());
-
-                // 종료시간
-                dumpEndTime = System.currentTimeMillis();
-                Log.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
+                shallowDumpData = getShallowDump(shallowDumpData);
 
                 //save res dump file
-                DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
-                        new ShallowDumpData(
-                                dumpStartTime,
-                                dumpEndTime,
-                                cpuInfo.toList(),
-                                cpuAppInfo.toList(),
-                                vmstatInfo.toList(),
-                                memoryInfo.toList(),
-                                activityStackList,
-                                networkInfo.toList(),
-                                stackTraceInfo
-                        )
-                );
+                DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(shallowDumpData);
             }
             try {
                 Thread.sleep(dumpTerm);
@@ -185,42 +154,123 @@ public class RylaInstrumentation extends Instrumentation {
         }
     }
 
-    public void startTouchTracing(Context mApplication) {
-        // 이방법으로 하면 ACTION 의 이름을 가져올수 없음
+    private float getBatteryPercent() {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = RYLA.getInstance().getContext().registerReceiver(null, ifilter);
 
-//        mWindowManager = (WindowManager) mApplication.getSystemService(WINDOW_SERVICE);
-//        touchLayout = new LinearLayout(mApplication);
-//
-//        WindowManager.LayoutParams params = new WindowManager.LayoutParams(1, WindowManager.LayoutParams.MATCH_PARENT);
-//        touchLayout.setLayoutParams(params);
-//        touchLayout.setOnTouchListener(touchListener);
-//
-//
-//        WindowManager.LayoutParams params2 = new WindowManager.LayoutParams(
-//                1,  // width
-//                1,  // height
-//                WindowManager.LayoutParams.TYPE_PHONE,
-//                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-//                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-//                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-//                PixelFormat.TRANSPARENT
-//        );
-//        params.gravity = Gravity.LEFT | Gravity.TOP;
-//        mWindowManager.addView(touchLayout, params2);
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        return level / (float)scale * 100;
+    }
+
+    public void startTouchTracing(Context mApplication) {
+
     }
 
     public void stopTouchTracing() {
-//        if(mWindowManager != null) {
-//            if(touchLayout != null) mWindowManager.removeView(touchLayout);
-//        }
+
+    }
+
+    public ShallowDumpData getShallowDump(ShallowDumpData shallowDumpData) {
+        //Dataset for dump file
+        Long dumpStartTime, dumpEndTime;
+        float battery;
+        NetworkResource networkInfo;
+        CPUResource cpuInfo;
+        CPUAppResource cpuAppInfo;
+        MemoryResource memoryInfo;
+        StatResource vmstatInfo;
+        ActivityStack activityStackList;
+        ThreadTrace stackTraceInfo;
+        SystemServiceData systemServiceData;
+
+        // 각각 걸리는 시간 계산
+        long tempTime = 0;
+        HashMap<String, Long> taskTime = new HashMap<>();
+
+        // 시작시간
+        dumpStartTime = System.currentTimeMillis();
+        Logger.d("DUMP TIME", "====== "+ dumpStartTime +" =======");
+
+        // dumpTerm 마다 쓰레드 트레이싱으로 문제가 되는 부분을 한번에 확인 가능
+        tempTime = System.currentTimeMillis();
+        stackTraceInfo = new ThreadTrace();
+        taskTime.put("thread_dump_time", System.currentTimeMillis() - tempTime);
+
+        activityStackList = new ActivityStack();
+
+        // NETWORK USAGE INFO
+        networkInfo = new NetworkResource();
+
+        // MEMORY INFO
+        tempTime = System.currentTimeMillis();
+        memoryInfo = new MemoryResource();
+        taskTime.put("memory_time", System.currentTimeMillis() - tempTime);
+
+        // CPU INFO
+        // top 방식 아닌 직접 가져오는 방식 사용
+        tempTime = System.currentTimeMillis();
+        cpuInfo = new CPUResource();
+        taskTime.put("proc_stat_time", System.currentTimeMillis() - tempTime);
+        tempTime = System.currentTimeMillis();
+        cpuAppInfo = new CPUAppResource();
+        taskTime.put("proc_pid_time", System.currentTimeMillis() - tempTime);
+
+        // vmstat INFO
+        tempTime = System.currentTimeMillis();
+        vmstatInfo = new StatResource();
+        taskTime.put("vmstat_time", System.currentTimeMillis() - tempTime);
+
+        //battery
+        battery = getBatteryPercent();
+
+        // Logging
+        Logger.d("NETWORK INFO", networkInfo.toString());
+        memoryInfo.printMemoryInfo();
+        Logger.d("CPU INFO", cpuInfo.toString());
+        Logger.d("CPU APP INFO", cpuAppInfo.toString());
+        Logger.d("VMSTAT INFO", vmstatInfo.toString());
+
+        systemServiceData = new SystemServiceData();
+
+
+        // 종료시간
+        dumpEndTime = System.currentTimeMillis();
+        Logger.d("DUMP TIME", "====== "+ dumpEndTime +" =======");
+        shallowDumpData.setDumpData(
+                dumpStartTime,
+                dumpEndTime,
+                cpuInfo,
+                cpuAppInfo,
+                vmstatInfo,
+                memoryInfo,
+                activityStackList,
+                networkInfo,
+                stackTraceInfo,
+                taskTime,
+                battery,
+                systemServiceData
+        );
+
+        return shallowDumpData;
     }
 
     private View.OnTouchListener touchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            Log.d("TOUCH INFO", event.toString());
-            Log.d("TOUCH INFO", event.getX()+"("+event.getRawX()+")" +"/"+ event.getY()+"("+event.getRawY()+")");
+            Logger.d("TOUCH INFO", event.toString());
+            Logger.d("TOUCH INFO", event.getX()+"("+event.getRawX()+")" +"/"+ event.getY()+"("+event.getRawY()+")");
             return false;
         }
     };
+
+    public static void markEventPath() {
+        EventPathManager.getInstance(RYLA.getInstance().getContext()).createEventPathItem(2, "");
+    }
+
+    public static void markEventPath(String label) {
+        Log.d("EventPath", "mark event path");
+        EventPathManager.getInstance(RYLA.getInstance().getContext()).createEventPathItem(2, label);
+    }
 }

@@ -1,7 +1,9 @@
 package com.lantern.lantern.Resource;
 
+import android.os.Build;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,8 +24,15 @@ public class StatResource implements Resource {
 
     public StatResource() {
         // vmstat INFO
+        // TODO 구형 폰에서 오래걸림
+
         Process process;
         String cmd = "vmstat";
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
+            return;
+        } else if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            cmd = "vmstat -n 1";
+        }
         int index = 0;
         try {
             process = Runtime.getRuntime().exec(cmd);
@@ -44,11 +53,38 @@ public class StatResource implements Resource {
             e.fillInStackTrace();
             Log.e("Process Manager", "Unable to execute "+cmd+" command");
         }
+
     }
 
     @Override
     public List<String> toList() {
         return vmstatInfo;
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject vmstatData = new JSONObject();
+
+        try {
+            // TODO vmstat의 데이터가 기종, 버전마다 다름
+            String[] labelVmStat = {"r", "b", "swpd", "free", "buff", "cache", "si", "so", "bi", "bo", "in", "cs", "us", "sy", "id", "wa"};
+            for (int i = 0; i < labelVmStat.length; i++) {
+                try {
+                    vmstatData.put(labelVmStat[i], vmstatInfo.get(i));
+                } catch (IndexOutOfBoundsException e) {
+                    vmstatData.put(labelVmStat[i], -1);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return vmstatData;
+    }
+
+    @Override
+    public JSONArray toJsonArray() {
+        return null;
     }
 
     @Override

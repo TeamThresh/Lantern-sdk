@@ -10,26 +10,29 @@ import org.json.JSONObject;
 public class ActivityRenderData implements DumpData {
     private String activityName;
     private String lifecycleName;
-    private Long callbackTime;
+    private Long startTime;
+    private Long endTime;
 
-    public static final String CREATED = "onCreated";
-    public static final String RESUMED = "onResumed";
-    public static final String STARTED = "onStarted";
-    public static final String PAUSED = "onPaused";
-    public static final String STOPPED = "onStopped";
-    public static final String DESTROYED = "onDestroyed";
+    public static final String CREATED = "onCreate";
+    public static final String RESUMED = "onResume";
+    public static final String STARTED = "onStart";
+    public static final String PAUSED = "onPause";
+    public static final String STOPPED = "onStop";
+    public static final String DESTROYED = "onDestroy";
 
 
     public ActivityRenderData() {
         this.activityName = "";
         this.lifecycleName = "";
-        this.callbackTime = (long) 0;
+        this.startTime = (long) 0;
+        this.endTime= (long) 0;
     }
 
-    public ActivityRenderData(String activityName, String lifecycleName, Long callbackTime) {
+    public ActivityRenderData(String activityName, String lifecycleName, Long startTime, Long endTime) {
         this.activityName = activityName;
         this.lifecycleName = lifecycleName;
-        this.callbackTime = callbackTime;
+        this.startTime = startTime ;
+        this.endTime = endTime ;
     }
 
     public String getActivityName() {
@@ -48,12 +51,20 @@ public class ActivityRenderData implements DumpData {
         this.lifecycleName = lifecycleName;
     }
 
-    public Long getCallbackTime() {
-        return callbackTime;
+    public Long getStartTime() {
+        return startTime;
     }
 
-    public void setCallbackTime(Long callbackTime) {
-        this.callbackTime = callbackTime;
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
     }
 
     @Override
@@ -64,9 +75,10 @@ public class ActivityRenderData implements DumpData {
         try {
             //type
             renderData.put("type", "render");
-            renderData.put("activityName", getActivityName());
-            renderData.put("lifecycleName", getLifecycleName());
-            renderData.put("callbackTime", getCallbackTime());
+            renderData.put("activity_name", getActivityName());
+            renderData.put("lifecycle_name", getLifecycleName());
+            renderData.put("start_time", getStartTime());
+            renderData.put("end_time", getEndTime());
 
         } catch (JSONException e) {
             e.printStackTrace();

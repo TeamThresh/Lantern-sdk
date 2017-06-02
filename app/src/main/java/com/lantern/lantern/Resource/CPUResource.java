@@ -2,6 +2,12 @@ package com.lantern.lantern.Resource;
 
 import android.util.Log;
 
+import com.lantern.lantern.util.Logger;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -31,12 +37,12 @@ public class CPUResource implements Resource {
 
             List<Long> usages2 = new ArrayList<>();
             for (String token : toks) {
-                Log.d(TAG, token);
+                Logger.d(TAG, token);
                 usages2.add(Long.parseLong(token));
             }
 
             if (usages1.isEmpty()) {
-                Log.d(TAG, "항상 여기");
+                Logger.d(TAG, "항상 여기");
                 usages1 = usages2;
                 cpuInfoList.add(-1L);
                 this.res = cpuInfoList;
@@ -45,11 +51,13 @@ public class CPUResource implements Resource {
 
             for (int i = 0; i < usages1.size(); i++) {
                 cpuInfoList.add(usages2.get(i) - usages1.get(i));
-                Log.d(TAG, "아님 여기");
-                Log.d(TAG, usages2.get(i) +"-"+usages1.get(i) + "="+(usages2.get(i) - usages1.get(i)));
+                Logger.d(TAG, "아님 여기");
+                Logger.d(TAG, usages2.get(i) +"-"+usages1.get(i) + "="+(usages2.get(i) - usages1.get(i)));
             }
 
             usages1 = usages2;
+
+            reader.close();
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         } catch (Exception e) {
@@ -61,6 +69,31 @@ public class CPUResource implements Resource {
     @Override
     public List<Long> toList() {
         return this.res;
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject cpuData = new JSONObject();
+
+        try {
+            String[] labelCpu = {"user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"};
+            for (int i = 0; i < labelCpu.length; i++) {
+                try {
+                    cpuData.put(labelCpu[i], res.get(i));
+                } catch (IndexOutOfBoundsException e) {
+                    cpuData.put(labelCpu[i], -1);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return cpuData;
+    }
+
+    @Override
+    public JSONArray toJsonArray() {
+        return null;
     }
 
     @Override

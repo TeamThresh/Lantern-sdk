@@ -1,7 +1,12 @@
 package com.lantern.lantern.Resource;
 
 import android.os.Debug;
-import android.util.Log;
+
+import com.lantern.lantern.util.Logger;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +29,11 @@ public class MemoryResource implements Resource {
     public MemoryResource() {
         memoryInfoList.clear();
 
+        memoryInfoList.add(Runtime.getRuntime().maxMemory());
+        memoryInfoList.add(Runtime.getRuntime().totalMemory());
+        memoryInfoList.add(Runtime.getRuntime().freeMemory());
+        memoryInfoList.add(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+
         this.natHeapSize = Debug.getNativeHeapSize();
         this.natHeapFreeSize = Debug.getNativeHeapFreeSize();
         this.pss = Debug.getPss();
@@ -34,34 +44,34 @@ public class MemoryResource implements Resource {
     }
 
     public void printMemoryInfo() {
-        Log.d(TAG, "========= START memory info =========");
+        Logger.d(TAG, "========= START memory info =========");
 
-        Log.d("MEMORY INFO", "Max Memory: "+Runtime.getRuntime().maxMemory());
-        Log.d("MEMORY INFO", "Total Memory: "+Runtime.getRuntime().totalMemory());
-        Log.d("MEMORY INFO", "Free Memory: "+Runtime.getRuntime().freeMemory());
-        Log.d("MEMORY INFO", "Allocated Memory: "+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+        Logger.d("MEMORY INFO", "Max Memory: "+Runtime.getRuntime().maxMemory());
+        Logger.d("MEMORY INFO", "Total Memory: "+Runtime.getRuntime().totalMemory());
+        Logger.d("MEMORY INFO", "Free Memory: "+Runtime.getRuntime().freeMemory());
+        Logger.d("MEMORY INFO", "Allocated Memory: "+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
 
-        //Log.d(TAG, ""+memoryInfo.getTotalSwappablePss());
-        Log.d(TAG, "TotalSharedDirty: "+memoryInfo.getTotalSharedDirty());
-        Log.d(TAG, "TotalPrivateDirty: "+memoryInfo.getTotalPrivateDirty());
-        Log.d(TAG, "TotalPss: "+memoryInfo.getTotalPss());
+        //Logger.d(TAG, ""+memoryInfo.getTotalSwappablePss());
+        Logger.d(TAG, "TotalSharedDirty: "+memoryInfo.getTotalSharedDirty());
+        Logger.d(TAG, "TotalPrivateDirty: "+memoryInfo.getTotalPrivateDirty());
+        Logger.d(TAG, "TotalPss: "+memoryInfo.getTotalPss());
 
-        Log.d(TAG, "dalvikPrivateDirty: "+memoryInfo.dalvikPrivateDirty);
-        Log.d(TAG, "dalvikPss: "+memoryInfo.dalvikPss);
-        Log.d(TAG, "dalvikSharedDirty: "+memoryInfo.dalvikSharedDirty);
+        Logger.d(TAG, "dalvikPrivateDirty: "+memoryInfo.dalvikPrivateDirty);
+        Logger.d(TAG, "dalvikPss: "+memoryInfo.dalvikPss);
+        Logger.d(TAG, "dalvikSharedDirty: "+memoryInfo.dalvikSharedDirty);
 
-        Log.d(TAG, "nativePrivateDirty: "+memoryInfo.nativePrivateDirty);
-        Log.d(TAG, "nativePss: "+memoryInfo.nativePss);
-        Log.d(TAG, "nativeSharedDirty: "+memoryInfo.nativeSharedDirty);
+        Logger.d(TAG, "nativePrivateDirty: "+memoryInfo.nativePrivateDirty);
+        Logger.d(TAG, "nativePss: "+memoryInfo.nativePss);
+        Logger.d(TAG, "nativeSharedDirty: "+memoryInfo.nativeSharedDirty);
 
-        Log.d(TAG, "otherPrivateDirty: "+memoryInfo.otherPrivateDirty);
-        Log.d(TAG, "otherPss: "+memoryInfo.otherPss);
-        Log.d(TAG, "otherSharedDirty: "+memoryInfo.otherSharedDirty);
+        Logger.d(TAG, "otherPrivateDirty: "+memoryInfo.otherPrivateDirty);
+        Logger.d(TAG, "otherPss: "+memoryInfo.otherPss);
+        Logger.d(TAG, "otherSharedDirty: "+memoryInfo.otherSharedDirty);
 
-        //Log.d(TAG, ""+memoryInfo.getTotalPrivateClean());
-        //Log.d(TAG, ""+memoryInfo.getTotalSharedClean());
+        //Logger.d(TAG, ""+memoryInfo.getTotalPrivateClean());
+        //Logger.d(TAG, ""+memoryInfo.getTotalSharedClean());
 
-        Log.d(TAG, "========= END memory info =========");
+        Logger.d(TAG, "========= END memory info =========");
     }
 
     @Override
@@ -73,6 +83,28 @@ public class MemoryResource implements Resource {
         memoryInfoList.add(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
 
         return memoryInfoList;
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject memoryData = new JSONObject();
+        if (memoryInfoList.size() > 0) {
+            try {
+                String[] labelMemory = {"max", "total", "alloc", "free"};
+                for (int i = 0; i < labelMemory.length; i++) {
+                    memoryData.put(labelMemory[i], memoryInfoList.get(i));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return memoryData;
+    }
+
+    @Override
+    public JSONArray toJsonArray() {
+        return null;
     }
 
     @Override
