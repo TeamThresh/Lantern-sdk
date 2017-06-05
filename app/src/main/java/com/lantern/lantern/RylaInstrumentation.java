@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import com.lantern.lantern.Resource.ActivityStack;
 import com.lantern.lantern.Resource.CPUAppResource;
 import com.lantern.lantern.Resource.CPUResource;
+import com.lantern.lantern.Resource.MemInfoResource;
 import com.lantern.lantern.Resource.MemoryResource;
 import com.lantern.lantern.Resource.NetworkResource;
 import com.lantern.lantern.Resource.StatResource;
@@ -184,6 +185,7 @@ public class RylaInstrumentation extends Instrumentation {
         ActivityStack activityStackList;
         ThreadTrace stackTraceInfo;
         SystemServiceData systemServiceData;
+        MemInfoResource memInfoResource;
 
         // 각각 걸리는 시간 계산
         long tempTime = 0;
@@ -207,6 +209,9 @@ public class RylaInstrumentation extends Instrumentation {
         tempTime = System.currentTimeMillis();
         memoryInfo = new MemoryResource();
         taskTime.put("memory_time", System.currentTimeMillis() - tempTime);
+
+        //meminfo
+        memInfoResource = new MemInfoResource();
 
         // CPU INFO
         // top 방식 아닌 직접 가져오는 방식 사용
@@ -250,7 +255,8 @@ public class RylaInstrumentation extends Instrumentation {
                 stackTraceInfo,
                 taskTime,
                 battery,
-                systemServiceData
+                systemServiceData,
+                memInfoResource
         );
 
         return shallowDumpData;

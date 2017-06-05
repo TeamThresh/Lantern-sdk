@@ -3,6 +3,7 @@ package com.lantern.lantern.dump;
 import com.lantern.lantern.Resource.ActivityStack;
 import com.lantern.lantern.Resource.CPUAppResource;
 import com.lantern.lantern.Resource.CPUResource;
+import com.lantern.lantern.Resource.MemInfoResource;
 import com.lantern.lantern.Resource.MemoryResource;
 import com.lantern.lantern.Resource.NetworkResource;
 import com.lantern.lantern.Resource.StatResource;
@@ -31,6 +32,7 @@ public class ShallowDumpData implements DumpData {
     private float batteryPercent;
     private SystemServiceData systemServiceData;
     private boolean forCrash;
+    private MemInfoResource memInfoResource;
 
     public ShallowDumpData() {
         this.forCrash = false;
@@ -44,7 +46,8 @@ public class ShallowDumpData implements DumpData {
                             CPUAppResource cpuAppInfo, StatResource vmstatInfo,
                             MemoryResource memoryInfo, ActivityStack activityStackInfo,
                             NetworkResource networkUsageInfo, ThreadTrace stackTraceinfo,
-                            HashMap<String, Long> taskTime, float batteryPercent, SystemServiceData systemServiceData) {
+                            HashMap<String, Long> taskTime, float batteryPercent,
+                            SystemServiceData systemServiceData, MemInfoResource memInfoResource) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.cpuInfo = cpuInfo;
@@ -57,6 +60,7 @@ public class ShallowDumpData implements DumpData {
         this.taskTime = taskTime;
         this.batteryPercent = batteryPercent;
         this.systemServiceData = systemServiceData;
+        this.memInfoResource = memInfoResource;
     }
 
 
@@ -147,6 +151,14 @@ public class ShallowDumpData implements DumpData {
         this.systemServiceData = systemServiceData;
     }
 
+    public MemInfoResource getMemInfoResource() {
+        return memInfoResource;
+    }
+
+    public void setMemInfoResource(MemInfoResource memInfoResource) {
+        this.memInfoResource = memInfoResource;
+    }
+
     @Override
     //type이 res인 dump JSON object 생성하기
     //crash dump data에서도 사용됨
@@ -197,6 +209,9 @@ public class ShallowDumpData implements DumpData {
             // vmstat
             osData.put("vmstat", getVmstatInfo().toJson());
 
+            //meminfo
+            osData.put("meminfo", getMemInfoResource().toJson());
+
             //battery
             // TODO 권한 필요
             //osData.put("battery", 10);
@@ -235,6 +250,7 @@ public class ShallowDumpData implements DumpData {
         return appData;
 
     }
+
 
 
 }

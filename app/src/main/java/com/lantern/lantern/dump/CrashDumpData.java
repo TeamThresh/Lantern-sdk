@@ -81,9 +81,11 @@ public class CrashDumpData implements DumpData {
 
                     eventPathData.put(eventPathItem);
                 }
-
-                crashData.put("event_path", eventPathData);
             }
+
+            crashData.put("event_path", eventPathData);
+
+            System.out.println(crashData);
 
             crashData.put("res_data", RylaInstrumentation.getInstance().getShallowDump(new ShallowDumpData(true)).getDumpData());
 
