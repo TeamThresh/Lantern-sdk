@@ -12,7 +12,7 @@
   buildscript {
     ...
     dependencies {
-      classpath 'lantern.thresh.io:demoPlugin:1.0.0-SNAPSHOT'
+      classpath 'com.lantern:lantern-injector:0.1.34'
       ...
     }
   }
