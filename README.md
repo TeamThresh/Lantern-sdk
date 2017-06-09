@@ -12,7 +12,7 @@
   buildscript {
     ...
     dependencies {
-      classpath 'com.lantern:lantern-injector:0.1.34'
+      classpath 'com.lantern:lantern-injector:0.1.63'
       ...
     }
   }

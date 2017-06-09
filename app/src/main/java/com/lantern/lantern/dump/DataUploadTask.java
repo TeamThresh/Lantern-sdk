@@ -122,6 +122,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
                 // 닫기
                 inputStream.close();
                 br.close();
+                os.close();
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -141,8 +142,9 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
     protected void onPostExecute(String result){
         //Log.d("Post Execute", result);
         Log.d(TAG, "complete to upload dump data");
-        if (conn != null)
+        if (conn != null) {
             conn.disconnect();
+        }
     }
 }
 
