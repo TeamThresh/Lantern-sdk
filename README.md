@@ -15,6 +15,8 @@
     }
     dependencies {
       classpath 'com.lantern:lantern-injector:0.1.63'
+      //For release
+      //classpath 'com.lantern:lantern-injector:0.1.63-release'
       ...
     }
   }
