@@ -6,7 +6,7 @@
 
   ```
   // Apply Lantern Plugin
-  apply plugin: 'hello.thinkcode.demo.plugin'
+  apply plugin: 'com.lantern.lantern'
 
   // Add Build script dependencies
   buildscript {
@@ -14,9 +14,7 @@
             jcenter()
     }
     dependencies {
-      classpath 'com.lantern:lantern-injector:0.1.63'
-      //For release
-      //classpath 'com.lantern:lantern-injector:0.1.63-release'
+      classpath 'com.lantern:lantern-injector:0.1.65'
       ...
     }
   }
