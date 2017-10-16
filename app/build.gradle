@@ -4,9 +4,15 @@ publish {
     userOrg = 'lantern-thresh'
     groupId = 'com.lantern'
     artifactId = 'lantern-sdk'
-    publishVersion = '0.1.63'
+    publishVersion = '0.1.66'
     desc = 'lantern mobile apm'
 }
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
 buildscript {
     repositories {
         jcenter()
@@ -19,6 +25,7 @@ buildscript {
 android {
     compileSdkVersion 25
     buildToolsVersion "24.0.1"
+    compileOptions.encoding='UTF-8'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25

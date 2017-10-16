@@ -14,7 +14,7 @@
             jcenter()
     }
     dependencies {
-      classpath 'com.lantern:lantern-injector:0.1.65'
+      classpath 'com.lantern:lantern-injector:0.1.66'
       ...
     }
   }
@@ -31,7 +31,7 @@
     @Override
     public void onCreate() {
       super.onCreate();
-      com.lantern.lantern.RYLA.getInstance().setContext("PROJECT_KEY", this).startResDump();
+      com.lantern.lantern.RYLA.getInstance().setContext("PROJECT_KEY", this, BuildConfig.BUILD_TYPE).startResDump();
       ...
     }
     ...

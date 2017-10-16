@@ -5,14 +5,11 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
-
 import android.os.Bundle;
-import android.util.Log;
 
 import com.lantern.lantern.dump.ActivityRenderData;
 import com.lantern.lantern.dump.DumpFileManager;
@@ -27,8 +24,6 @@ import java.util.UUID;
 
 import javax.net.ssl.SSLSocket;
 
-import static android.content.Context.MODE_PRIVATE;
-
 /**
  * Created by YS on 2017-01-25.
  */
@@ -38,6 +33,7 @@ public class RYLA {
     private static String activityName;
     private static long startTime;
     private static long endTime;
+    private static boolean isDebug = true;
 
     RylaInstrumentation rylaInstrumentation;
 
@@ -65,38 +61,57 @@ public class RYLA {
     }
 
     // 실행전 Context 설정
-    public RYLA setContext(String projectKey, Application application) {
-        Logger.d("RYLA", "setContext 실행");
+    public RYLA setContext(String projectKey, Application application, String buildType) {
+        if (buildType.equals("debug")) {
+            return setContext(projectKey, application, true);
+        } else {
+            return setContext(projectKey, application, false);
+        }
+    }
+    public RYLA setContext(String projectKey, Application application, boolean buildType) {
         mApplication = application;
+        isDebug = buildType;
+        init(projectKey);
+        return mRYLA;
+    }
 
-        generateUUID();
-        saveProjectKey(projectKey);
+    public RYLA setContext(String projectKey, Application application) {
+        mApplication = application;
+        isDebug = BuildConfig.DEBUG;
+        init(projectKey);
+        return mRYLA;
+    }
 
-        // 스크린 OnOff 등록
-        installScreenOffListner();
+    public void init(String projectKey) {
+
+        if (!isDebug) {
+            generateUUID();
+            saveProjectKey(projectKey);
+
+            // 스크린 OnOff 등록
+            installScreenOffListner();
 
 
-        // 디바이스 정보
-        DeviceInfo.printDeviceInfo();
+            // 디바이스 정보
+            DeviceInfo.printDeviceInfo();
 
-        // Custom Exception Handler 등록
-        installExceptionHandler();
+            // Custom Exception Handler 등록
+            installExceptionHandler();
 
-        // Activity List 를 가져오기위해 Callback에 등록
-        mApplication.registerActivityLifecycleCallbacks(alcb);
+            // Activity List 를 가져오기위해 Callback에 등록
+            mApplication.registerActivityLifecycleCallbacks(alcb);
 
-        // Network 요청 정보를 가져오기위해 Factory에 등록
-        startNetworkTracing();
+            // Network 요청 정보를 가져오기위해 Factory에 등록
+            startNetworkTracing();
 
-        // 덤프 파일 초기화
-        //DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
+            // 덤프 파일 초기화
+            //DumpFileManager.getInstance(RYLA.getInstance().getContext()).initDumpFile();
 /*
         String[] fileList = DumpFileManager.getInstance(RYLA.getInstance().getContext()).getFileList();
         for (String file : fileList) {
             DumpFileManager.getInstance(RYLA.getInstance().getContext()).deleteDumpFile(file);
         }*/
-
-        return mRYLA;
+        }
     }
 
     public RYLA setActivityContext(Context context) {
@@ -140,11 +155,13 @@ public class RYLA {
 
     // Res 덤프 시작
     public void startResDump() {
-        Logger.d("RYLA", "startResDump()");
+        if (isDebug) {
+            Logger.d("RYLA", "startResDump()");
 
-        // Instrumentation 실행
-        // Instrumentation 에서 CPU, Memory, Battery, 화면 클릭 가져옴
-        RylaInstrumentation.getInstance().execute();
+            // Instrumentation 실행
+            // Instrumentation 에서 CPU, Memory, Battery, 화면 클릭 가져옴
+            RylaInstrumentation.getInstance().execute();
+        }
     }
 
     private void generateUUID() {
@@ -308,21 +325,23 @@ public class RYLA {
     }
 
     public void startRender(String lifecycleName) {
-        Log.d("ASM TEST", "TEST!!!!!!!!");
-
-        startTime = System.currentTimeMillis();
-        Log.d("START Activity Time", "Activity Name: " + activityName + ", LFC Name: "+ lifecycleName + ", Time: "+startTime);
+        if (!isDebug) {
+            startTime = System.currentTimeMillis();
+        }
+        Logger.d("START Activity Time", "Activity Name: " + activityName + ", LFC Name: "+ lifecycleName + ", Time: "+startTime);
     }
 
     public void endRender(String lifecycleName) {
-        endTime = System.currentTimeMillis();
-        Log.d("END Activity Time", "Activity Name: " + activityName + ", LFC Name: "+ lifecycleName + ", Time: "+endTime);
-        // TODO Save Render time info
-        DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
-            new ActivityRenderData(activityName,
-                    lifecycleName,
-                    startTime,
-                    endTime)
-        );
+        if (!isDebug) {
+            endTime = System.currentTimeMillis();
+            Logger.d("END Activity Time", "Activity Name: " + activityName + ", LFC Name: " + lifecycleName + ", Time: " + endTime);
+            // TODO Save Render time info
+            DumpFileManager.getInstance(RYLA.getInstance().getContext()).saveDumpData(
+                    new ActivityRenderData(activityName,
+                            lifecycleName,
+                            startTime,
+                            endTime)
+            );
+        }
     }
 }
