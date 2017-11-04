@@ -14,7 +14,7 @@
             jcenter()
     }
     dependencies {
-      classpath 'com.lantern:lantern-injector:0.1.66'
+      classpath 'com.lantern:lantern-injector:0.1.67'
       ...
     }
   }
