@@ -1,7 +1,5 @@
 package com.lantern.lantern.Resource;
 
-import android.util.Log;
-
 import com.lantern.lantern.util.Logger;
 
 import org.json.JSONArray;
@@ -59,9 +57,9 @@ public class CPUResource implements Resource {
 
             reader.close();
         } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
+            Logger.e(TAG, e.getMessage());
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            Logger.e(TAG, e.getMessage());
         }
         this.res = cpuInfoList;
     }

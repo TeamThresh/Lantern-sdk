@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.BatteryManager;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -276,7 +275,7 @@ public class RylaInstrumentation extends Instrumentation {
     }
 
     public static void markEventPath(String label) {
-        Log.d("EventPath", "mark event path");
+        Logger.d("EventPath", "mark event path");
         EventPathManager.getInstance(RYLA.getInstance().getContext()).createEventPathItem(2, label);
     }
 }

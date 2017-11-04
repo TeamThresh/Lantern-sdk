@@ -21,4 +21,28 @@ public class Logger {
             android.util.Log.d(tag, msg, tr);
         }
     }
+
+    public static void i(String tag, String msg) {
+        if (PRINT_LOG) {
+            android.util.Log.i(tag, msg);
+        }
+    }
+
+    public static void i(String tag, String msg, Throwable tr) {
+        if (PRINT_LOG) {
+            android.util.Log.i(tag, msg, tr);
+        }
+    }
+
+    public static void e(String tag, String msg) {
+        if (PRINT_LOG) {
+            android.util.Log.e(tag, msg);
+        }
+    }
+
+    public static void e(String tag, String msg, Throwable tr) {
+        if (PRINT_LOG) {
+            android.util.Log.e(tag, msg, tr);
+        }
+    }
 }

@@ -1,7 +1,6 @@
 package com.lantern.lantern.Resource;
 
 import android.app.ActivityManager;
-import android.util.Log;
 
 import com.lantern.lantern.RYLA;
 import com.lantern.lantern.util.Logger;
@@ -62,9 +61,9 @@ public class CPUAppResource implements Resource {
 
             reader.close();
         } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
+            Logger.e(TAG, e.getMessage());
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            Logger.e(TAG, e.getMessage());
         }
     }
 

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.util.Log;
 
 import com.lantern.lantern.util.Logger;
 
@@ -67,7 +66,7 @@ public class DumpFileManager {
                 mContext.getPackageName() + "_" +
                 calendar.get(Calendar.YEAR) + (calendar.get(Calendar.MONTH) + 1) +
                 calendar.get(Calendar.DAY_OF_MONTH) + "_" + calendar.getTimeInMillis();
-        Log.d("FILENAME", FILE_NAME);
+        Logger.d("FILENAME", FILE_NAME);
 
         //덤프 헤더를 파일에 저장
         initDumpHead();
@@ -229,7 +228,7 @@ public class DumpFileManager {
 
     //덤프 파일 읽어오기
     public synchronized String readDumpFile() {
-        Log.d("Lantern","read Dump File");
+        Logger.d("Lantern","read Dump File");
         FileInputStream inputStream;
         StringBuilder builder = new StringBuilder();
 
@@ -259,7 +258,7 @@ public class DumpFileManager {
 
     //덤프 파일 읽어오기
     public synchronized String readDumpFile(String fileName) {
-        Log.d("Lantern","read Dump File");
+        Logger.d("Lantern","read Dump File");
         FileInputStream inputStream;
         StringBuilder builder = new StringBuilder();
 
@@ -288,7 +287,7 @@ public class DumpFileManager {
 
     //dump data 파일에 저장하기
     public synchronized void saveDumpData(DumpData dumpData) {
-        Log.d("Lantern", "save Dump File" + dumpData.getClass());
+        Logger.d("Lantern", "save Dump File" + dumpData.getClass());
         JSONObject resDumpJson = dumpData.getDumpData();
         /*JSONObject preSavedDumpData;
 
@@ -304,8 +303,8 @@ public class DumpFileManager {
 
         // File Append
         try {
-            Log.d("dumpdata", resDumpJson.toString());
-            Log.d("directory path",mContext.getFilesDir().toString()+"/"+FILE_NAME);
+            Logger.d("dumpdata", resDumpJson.toString());
+            Logger.d("directory path",mContext.getFilesDir().toString()+"/"+FILE_NAME);
             File f= new File(mContext.getFilesDir().toString()+"/"+FILE_NAME);
             PrintWriter pww = new PrintWriter(new BufferedWriter(new FileWriter(f, true)));
 
@@ -327,20 +326,20 @@ public class DumpFileManager {
         String[] allList = file.list();
         ArrayList<String> lanternList = new ArrayList<>();
         for(String name: allList) {
-            Log.d("ALL FILELIST NAME", name);
+            Logger.d("ALL FILELIST NAME", name);
             String[] splited = name.split("_");
             if (splited[0].equals(FILE_NAME_HEADER)
                     && splited[1].equals(mContext.getPackageName())) {
                 // 현재 파일 제외 (아직 쓰고있음)
                 if (!name.equals(FILE_NAME)) {
-                    Log.d("FILELIST NAME", name);
+                    Logger.d("FILELIST NAME", name);
                     lanternList.add(name);
                 }
             } else if (splited[0].equals("ryla")) {
                 mContext.deleteFile(name);
             }
         }
-        Log.d("FILELIST", lanternList.toString());
+        Logger.d("FILELIST", lanternList.toString());
 
         if (lanternList.size() == 0){
             return new String[] {};
@@ -351,9 +350,9 @@ public class DumpFileManager {
 
     public synchronized void deleteDumpFile(String fileName) {
         if (mContext.deleteFile(fileName)) {
-            Log.d("File delete", "파일 지우기 성공");
+            Logger.d("File delete", "파일 지우기 성공");
         } else {
-            Log.d("File delete", "파일 지우기 실패");
+            Logger.d("File delete", "파일 지우기 실패");
         }
     }
 }

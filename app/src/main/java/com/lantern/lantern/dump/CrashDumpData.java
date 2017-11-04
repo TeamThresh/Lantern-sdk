@@ -1,16 +1,10 @@
 package com.lantern.lantern.dump;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.util.Log;
-
 import com.lantern.lantern.RYLA;
-import com.lantern.lantern.Resource.ThreadTrace;
 import com.lantern.lantern.RylaInstrumentation;
 import com.lantern.lantern.eventpath.EventPathItem;
 import com.lantern.lantern.eventpath.EventPathManager;
+import com.lantern.lantern.util.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -69,7 +63,7 @@ public class CrashDumpData implements DumpData {
 
             List<EventPathItem> eventPath = EventPathManager.getInstance(RYLA.getInstance().getContext()).getEventPathList();
 
-            Log.d("crash dump data", "event path num : " + eventPath.size());
+            Logger.d("crash dump data", "event path num : " + eventPath.size());
             if (eventPath != null && eventPath.size() != 0) {
                 for (EventPathItem item : eventPath) {
                     JSONObject eventPathItem = new JSONObject();

@@ -1,7 +1,8 @@
 package com.lantern.lantern.network;
 
 import android.os.Message;
-import android.util.Log;
+
+import com.lantern.lantern.util.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +50,7 @@ public class SocketMonitoringInputStream extends InputStream {
                     msg.obj = new NetworkCallbackData(s.split(" ")[1]);
 
                     callbackHandler.complete(msg);
-                    Log.d("HTTPGET", s);
+                    Logger.d("HTTPGET", s);
                 }
 
                 connected = true;

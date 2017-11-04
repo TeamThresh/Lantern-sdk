@@ -1,7 +1,8 @@
 package com.lantern.lantern;
 
 import android.os.Build;
-import android.util.Log;
+
+import com.lantern.lantern.util.Logger;
 
 /**
  * Created by YS on 2017-02-01.
@@ -15,20 +16,20 @@ public class DeviceInfo {
     }
 
     public static void printDeviceInfo() {
-        Log.i(TAG, "BOARD = " + Build.BOARD);
-        Log.i(TAG, "BRAND = " + Build.BRAND);
-        Log.i(TAG, "CPU_ABI = " + Build.CPU_ABI);
-        Log.i(TAG, "DEVICE = " + Build.DEVICE);
-        Log.i(TAG, "DISPLAY = " + Build.DISPLAY);
-        Log.i(TAG, "FINGERPRINT = " + Build.FINGERPRINT);
-        Log.i(TAG, "HOST = " + Build.HOST);
-        Log.i(TAG, "ID = " + Build.ID);
-        Log.i(TAG, "MANUFACTURER = " + Build.MANUFACTURER);
-        Log.i(TAG, "MODEL = " + Build.MODEL);
-        Log.i(TAG, "PRODUCT = " + Build.PRODUCT);
-        Log.i(TAG, "TAGS = " + Build.TAGS);
-        Log.i(TAG, "TYPE = " + Build.TYPE);
-        Log.i(TAG, "USER = " + Build.USER);
-        Log.i(TAG, "VERSION.RELEASE = " + Build.VERSION.RELEASE);
+        Logger.i(TAG, "BOARD = " + Build.BOARD);
+        Logger.i(TAG, "BRAND = " + Build.BRAND);
+        Logger.i(TAG, "CPU_ABI = " + Build.CPU_ABI);
+        Logger.i(TAG, "DEVICE = " + Build.DEVICE);
+        Logger.i(TAG, "DISPLAY = " + Build.DISPLAY);
+        Logger.i(TAG, "FINGERPRINT = " + Build.FINGERPRINT);
+        Logger.i(TAG, "HOST = " + Build.HOST);
+        Logger.i(TAG, "ID = " + Build.ID);
+        Logger.i(TAG, "MANUFACTURER = " + Build.MANUFACTURER);
+        Logger.i(TAG, "MODEL = " + Build.MODEL);
+        Logger.i(TAG, "PRODUCT = " + Build.PRODUCT);
+        Logger.i(TAG, "TAGS = " + Build.TAGS);
+        Logger.i(TAG, "TYPE = " + Build.TYPE);
+        Logger.i(TAG, "USER = " + Build.USER);
+        Logger.i(TAG, "VERSION.RELEASE = " + Build.VERSION.RELEASE);
     }
 }

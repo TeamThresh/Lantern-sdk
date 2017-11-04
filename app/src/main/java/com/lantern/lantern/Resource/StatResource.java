@@ -1,7 +1,8 @@
 package com.lantern.lantern.Resource;
 
 import android.os.Build;
-import android.util.Log;
+
+import com.lantern.lantern.util.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,7 +52,7 @@ public class StatResource implements Resource {
             process.destroy();
         } catch (Exception e) {
             e.fillInStackTrace();
-            Log.e("Process Manager", "Unable to execute "+cmd+" command");
+            Logger.e("Process Manager", "Unable to execute "+cmd+" command");
         }
 
     }

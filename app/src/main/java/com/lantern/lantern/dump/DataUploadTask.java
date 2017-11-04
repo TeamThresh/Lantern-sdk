@@ -2,7 +2,6 @@ package com.lantern.lantern.dump;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.lantern.lantern.RYLA;
 import com.lantern.lantern.util.Logger;
@@ -45,7 +44,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
         String[] fileList = DumpFileManager.getInstance(RYLA.getInstance().getContext()).getFileList();
         for (String fileName : fileList) {
-            Log.d(TAG, fileName);
+            Logger.d(TAG, fileName);
         }
         // 저장된 파일 갯수 만큼 http 실행
         for (String file : fileList) {
@@ -115,7 +114,6 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
 
                 String line = null;
                 while ((line = br.readLine()) != null) {
-                    Log.d(TAG, "response : " + line);
                     Logger.d(TAG, "response : " + line);
                 }
 
@@ -141,7 +139,7 @@ public class DataUploadTask extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(String result){
         //Log.d("Post Execute", result);
-        Log.d(TAG, "complete to upload dump data");
+        Logger.d(TAG, "complete to upload dump data");
         if (conn != null) {
             conn.disconnect();
         }

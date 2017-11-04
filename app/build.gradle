@@ -4,7 +4,7 @@ publish {
     userOrg = 'lantern-thresh'
     groupId = 'com.lantern'
     artifactId = 'lantern-sdk'
-    publishVersion = '0.1.66'
+    publishVersion = '0.1.67'
     desc = 'lantern mobile apm'
 }
 tasks.withType(Javadoc) {
@@ -18,7 +18,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.novoda:bintray-release:0.3.4'
+        classpath 'com.novoda:bintray-release:0.5.0'
     }
 }
 
@@ -44,3 +44,12 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
+
+//apply plugin: 'com.jfrog.bintray'
+
+/*bintray {
+    user='jratul@hanmail.net'
+    key='4105750ebeae646c7b0ca059d89cffdcb6d66876'
+    configurations = ['archives'] // When uploading configuration files
+    publish = true // [Default: false] Whether version should be auto published after an upload
+}*/
