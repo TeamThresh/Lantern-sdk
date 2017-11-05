@@ -155,7 +155,7 @@ public class RYLA {
 
     // Res 덤프 시작
     public void startResDump() {
-        if (isDebug) {
+        if (!isDebug) {
             Logger.d("RYLA", "startResDump()");
 
             // Instrumentation 실행
